@@ -38,19 +38,15 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 find_package(PkgConfig REQUIRED)
-find_package(Gcrypt 1.6.0 REQUIRED)
+find_package(Gcrypt 1.8.0 REQUIRED)
 pkg_check_modules(COTP REQUIRED cotp>=1.2.1)
 pkg_check_modules(PNG REQUIRED libpng>=1.2.0)
-pkg_check_modules(LIBZIP REQUIRED libzip>=1.0.0)
-pkg_check_modules(JANSSON REQUIRED jansson>=2.6.0)
-pkg_check_modules(ZBAR REQUIRED zbar>=0.10)
-pkg_check_modules(GTK3 REQUIRED gtk+-3.0>=3.18.0)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0>=2.48.0)
-pkg_check_modules(GIO REQUIRED gio-2.0>=2.48.0)
-
-if(${ZBAR_VERSION} VERSION_EQUAL 0.10)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZBAR_OLD_LIB")
-endif ()
+pkg_check_modules(LIBZIP REQUIRED libzip>=1.5.0)
+pkg_check_modules(JANSSON REQUIRED jansson>=2.10.0)
+pkg_check_modules(ZBAR REQUIRED zbar>=0.20)
+pkg_check_modules(GTK4 REQUIRED gtk4>=3.99)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0>=2.56.0)
+pkg_check_modules(GIO REQUIRED gio-2.0>=2.56.0)
 
 set(GUI_HEADER_FILES
         src/common/common.h
@@ -144,7 +140,7 @@ if(BUILD_GUI AND BUILD_CLI)
 endif()
 
 if(BUILD_GUI)
-        include_directories(${GTK3_INCLUDE_DIRS}
+        include_directories(${GTK4_INCLUDE_DIRS}
                 ${GCRYPT_INCLUDE_DIRS}
                 ${COTP_INCLUDE_DIRS}
                 ${LIBZIP_INCLUDE_DIRS}
@@ -154,7 +150,7 @@ if(BUILD_GUI)
 
         add_executable(${PROJECT_NAME} ${GUI_SOURCE_FILES} ${GUI_HEADER_FILES})
         target_link_libraries(${PROJECT_NAME}
-                ${GTK3_LIBRARIES}
+                ${GTK4_LIBRARIES}
                 ${GCRYPT_LIBRARIES}
                 ${COTP_LIBRARIES}
                 ${LIBZIP_LIBRARIES}
@@ -167,7 +163,7 @@ if(BUILD_GUI)
 endif()
 
 if(BUILD_CLI)
-        include_directories(${GTK3_INCLUDE_DIRS}
+        include_directories(${GTK4_INCLUDE_DIRS}
                 ${GCRYPT_INCLUDE_DIRS}
                 ${COTP_INCLUDE_DIRS}
                 ${JANSSON_INCLUDE_DIRS})
@@ -187,7 +183,7 @@ if(BUILD_CLI)
                 ${JANSSON_LIBRARIES})
         if(BUILD_GUI)
                 target_link_libraries(${PROJECT_NAME}-cli
-                        ${GTK3_LIBRARIES}
+                        ${GTK4_LIBRARIES}
                         ${LIBZIP_LIBRARIES}
                         ${PNG_LIBRARIES}
                         ${ZBAR_LIBRARIES})
