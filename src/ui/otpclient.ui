@@ -498,6 +498,7 @@ has been found or after 30 seconds if nothing has been detected.</property>
     <property name="can-focus">False</property>
     <property name="border-width">5</property>
     <property name="title" translatable="yes">Database location</property>
+    <property name="modal">True</property>
     <property name="window-position">center</property>
     <property name="type-hint">dialog</property>
     <property name="gravity">center</property>
@@ -1687,8 +1688,10 @@ Please note that &lt;b&gt;there is no way to recover a forgotten password.&lt;/b
       <object class="GtkHeaderBar" id="headerbar_id">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="title" translatable="yes">OTPClient</property>
         <property name="show-close-button">True</property>
+        <child type="title">
+          <placeholder/>
+        </child>
         <child>
           <object class="GtkBox" id="main_hbar">
             <property name="visible">True</property>
@@ -1864,6 +1867,7 @@ Please type your password to unlock it</property>
   <object class="GtkDialog" id="warning_diag_id">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Warning: memlock value too low</property>
+    <property name="modal">True</property>
     <property name="window-position">center</property>
     <property name="type-hint">dialog</property>
     <property name="gravity">center</property>

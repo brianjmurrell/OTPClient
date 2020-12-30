@@ -44,9 +44,9 @@ pkg_check_modules(PNG REQUIRED libpng>=1.2.0)
 pkg_check_modules(LIBZIP REQUIRED libzip>=1.5.0)
 pkg_check_modules(JANSSON REQUIRED jansson>=2.10.0)
 pkg_check_modules(ZBAR REQUIRED zbar>=0.20)
-pkg_check_modules(GTK4 REQUIRED gtk4>=3.99)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0>=2.56.0)
-pkg_check_modules(GIO REQUIRED gio-2.0>=2.56.0)
+pkg_check_modules(GTK4 REQUIRED gtk4>=4.0)
+pkg_check_modules(GLIB2 REQUIRED glib-2.0>=2.58.0)
+pkg_check_modules(GIO REQUIRED gio-2.0>=2.58.0)
 
 set(GUI_HEADER_FILES
         src/common/common.h

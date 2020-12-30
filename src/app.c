@@ -17,6 +17,19 @@
 
 #ifndef USE_FLATPAK_APP_FOLDER
 static gchar     *get_db_path               (AppData            *app_data);
+
+static void       fc_dialog_response        (GtkNativeDialog *native,
+                                             int              response,
+                                             gpointer         user_data);
+
+typedef struct s_get_db_path_data {
+    GMainLoop  *loop;
+    GtkFileChooser *chooser;
+    gchar *db_path;
+    GError *err;
+    GKeyFile *kf;
+    gchar *cfg_file_path;
+} GetDBPathData;
 #endif
 
 static GKeyFile  *get_kf_ptr                (void);
@@ -27,7 +40,9 @@ static void       get_wh_data               (gint               *width,
 
 static gboolean   get_warn_data             (void);
 
-static void       set_warn_data             (gboolean            show_warning);
+static void       set_warn_data             (GtkDialog          *dlg,
+                                             gint                response_id,
+                                             gpointer            user_data);
 
 static void       create_main_window        (gint                width,
                                              gint                height,
@@ -60,14 +75,20 @@ static void       store_data                (const gchar        *param1_name,
                                              const gchar        *param2_name,
                                              gint                param2_value);
 
-static gboolean   key_pressed_cb            (GtkWidget          *window,
-                                             GdkEventKey        *event_key,
-                                             gpointer            user_data);
+static gboolean   key_pressed_cb            (GtkEventControllerKey *controller,
+                                             guint                  keyval,
+                                             guint                  keycode,
+                                             GdkModifierType        state,
+                                             gpointer               user_data);
 
 static gboolean   show_memlock_warn_dialog  (gint32              max_file_size,
                                              GtkBuilder         *builder);
 
 static void       set_open_db_action        (GtkWidget          *btn,
+                                             gpointer            user_data);
+
+static void       cleanup_destroy_diag_cb   (GtkDialog          *dlg,
+                                             gint                response_id,
                                              gpointer            user_data);
 
 
@@ -127,20 +148,19 @@ activate (GtkApplication    *app,
         app_data->diag_rcdb = GTK_WIDGET(gtk_builder_get_object (app_data->builder, "dialog_rcdb_id"));
         GtkWidget *restore_btn = GTK_WIDGET(gtk_builder_get_object (app_data->builder, "diag_rc_restoredb_btn_id"));
         GtkWidget *create_btn = GTK_WIDGET(gtk_builder_get_object (app_data->builder, "diag_rc_createdb_btn_id"));
-        g_signal_connect (restore_btn, "clicked", G_CALLBACK (set_open_db_action), app_data);
-        g_signal_connect (create_btn, "clicked", G_CALLBACK (set_open_db_action), app_data);
+        gtk_window_set_transient_for (GTK_WINDOW(app_data->diag_rcdb), GTK_WINDOW(app_data->main_window));
+        gtk_widget_show (app_data->diag_rcdb);
 
-        gint response = gtk_dialog_run (GTK_DIALOG(app_data->diag_rcdb));
-        switch (response) {
-            case GTK_RESPONSE_CANCEL:
-            default:
-                gtk_widget_destroy (app_data->diag_rcdb);
-                g_free (app_data->db_data);
-                g_free (app_data);
-                g_application_quit (G_APPLICATION(app));
-                return;
-            case GTK_RESPONSE_OK:
-                gtk_widget_destroy (app_data->diag_rcdb);
+        g_signal_connect (restore_btn, "clicked", G_CALLBACK(set_open_db_action), app_data);
+        g_signal_connect (create_btn, "clicked", G_CALLBACK(set_open_db_action), app_data);
+        app_data->loop = g_main_loop_new (NULL, FALSE);
+        g_signal_connect (app_data->diag_rcdb, "response", G_CALLBACK(cleanup_destroy_diag_cb), app_data);
+        g_main_loop_run (app_data->loop);
+        g_main_loop_unref (app_data->loop);
+        app_data->loop = NULL;
+        if (app_data->quit_app == TRUE) {
+            g_application_quit (G_APPLICATION(app));
+            return;
         }
     }
 
@@ -204,7 +224,7 @@ activate (GtkApplication    *app,
         g_clear_error (&tmp_err);
     }
 
-    app_data->clipboard = gtk_clipboard_get (GDK_SELECTION_CLIPBOARD);
+    app_data->clipboard = gdk_display_get_clipboard (gdk_display_get_default ());
 
     create_treeview (app_data);
 
@@ -218,12 +238,13 @@ activate (GtkApplication    *app,
     GtkToggleButton *del_toggle_btn = GTK_TOGGLE_BUTTON(gtk_builder_get_object (app_data->builder, "del_toggle_btn_id"));
 
     g_signal_new ("toggle-delete-button", G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
-    GtkBindingSet *toggle_btn_binding_set = gtk_binding_set_by_class (GTK_APPLICATION_WINDOW_GET_CLASS (app_data->main_window));
-    gtk_binding_entry_add_signal (toggle_btn_binding_set, GDK_KEY_d, GDK_CONTROL_MASK, "toggle-delete-button", 0);
+    GtkEventController *controller = gtk_event_controller_key_new ();
+    g_signal_connect (controller, "key-pressed", G_CALLBACK(key_pressed_cb), app_data->main_window);
+    gtk_widget_add_controller (app_data->main_window, controller);
+
+    gtk_widget_class_add_binding_signal (GTK_WIDGET_GET_CLASS(app_data->main_window), GDK_KEY_d, GDK_CONTROL_MASK, "toggle-delete-button", NULL);
     g_signal_connect (app_data->main_window, "toggle-delete-button", G_CALLBACK(toggle_delete_button_cb), del_toggle_btn);
     g_signal_connect (del_toggle_btn, "toggled", G_CALLBACK(del_data_cb), app_data);
-    g_signal_connect (app_data->main_window, "key_press_event", G_CALLBACK(key_pressed_cb), NULL);
-
     g_signal_connect (app_data->main_window, "destroy", G_CALLBACK(destroy_cb), app_data);
 
     app_data->source_id = g_timeout_add_full (G_PRIORITY_DEFAULT, 500, traverse_liststore, app_data, NULL);
@@ -233,8 +254,27 @@ activate (GtkApplication    *app,
     // set last user activity to now, so we have a starting point for the autolock feature
     app_data->last_user_activity = g_date_time_new_now_local ();
     app_data->source_id_last_activity = g_timeout_add_seconds (1, check_inactivity, app_data);
+}
 
-    gtk_widget_show_all (app_data->main_window);
+
+static void
+cleanup_destroy_diag_cb (GtkDialog *dlg,
+                         gint       response_id,
+                         gpointer   user_data)
+{
+    AppData *app_data = (AppData *)user_data;
+    if (response_id == GTK_RESPONSE_CANCEL) {
+        gtk_window_destroy (GTK_WINDOW(dlg));
+        g_free (app_data->db_data);
+        g_free (app_data);
+    }
+    if (response_id == GTK_RESPONSE_OK) {
+        gtk_window_destroy (GTK_WINDOW(dlg));
+        app_data->quit_app = FALSE;
+    }
+    if (app_data->loop) {
+        g_main_loop_quit (app_data->loop);
+    }
 }
 
 
@@ -251,37 +291,37 @@ show_memlock_warn_dialog (gint32      max_file_size,
     GtkLabel *warn_label = GTK_LABEL(gtk_builder_get_object (builder, "warning_diag_label_id"));
     GtkWidget *warn_chk_btn = GTK_WIDGET(gtk_builder_get_object (builder, "warning_diag_check_btn_id"));
     gtk_label_set_label (warn_label, msg);
-    gtk_widget_show_all (warn_diag);
-    gboolean quit = FALSE;
-    gint result = gtk_dialog_run (GTK_DIALOG (warn_diag));
-    switch (result) {
-        case GTK_RESPONSE_OK:
-            set_warn_data (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(warn_chk_btn)));
-            break;
-        case GTK_RESPONSE_CLOSE:
-        default:
-            set_warn_data (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(warn_chk_btn)));
-            quit = TRUE;
-            break;
-    }
-    gtk_widget_destroy (warn_diag);
+    gtk_widget_show (warn_diag);
+
+    GMainLoop *loop = g_main_loop_new (NULL, FALSE);
+
+    GQueue *queue = g_queue_new ();
+    g_queue_push_head (queue, warn_chk_btn);
+    g_queue_push_head (queue, loop);
+
+    g_signal_connect (warn_diag, "response", G_CALLBACK(set_warn_data), queue);
+
+    g_main_loop_run (loop);
+    g_main_loop_unref (loop);
+    loop = NULL;
+
+    gboolean quit = GPOINTER_TO_INT(g_queue_pop_head (queue));
     g_free (msg);
+    g_queue_free (queue);
 
     return quit;
 }
 
 
 static gboolean
-key_pressed_cb (GtkWidget   *window,
-                GdkEventKey *event_key,
-                gpointer     user_data __attribute__((unused)))
+key_pressed_cb (GtkEventControllerKey *controller __attribute__((unused)),
+                guint                  keyval,
+                guint                  keycode    __attribute__((unused)),
+                GdkModifierType        state      __attribute__((unused)),
+                gpointer               user_data)
 {
-    switch (event_key->keyval) {
-        case GDK_KEY_q:
-        if (event_key->state & GDK_CONTROL_MASK) {
-            gtk_window_close (GTK_WINDOW(window));
-        }
-        break;
+    if (keyval == GDK_KEY_q) {
+        gtk_window_close (GTK_WINDOW(user_data));
     }
     return FALSE;
 }
@@ -350,8 +390,17 @@ get_warn_data ()
 
 
 static void
-set_warn_data (gboolean show_warning)
+set_warn_data (GtkDialog *dlg,
+               gint       response_id,
+               gpointer   user_data)
 {
+    GQueue *queue = (GQueue *)user_data;
+    GMainLoop *loop = g_queue_pop_head (queue);
+    GtkWidget *warn_chk_btn = g_queue_pop_head (queue);
+
+    g_queue_push_head (queue, GINT_TO_POINTER(response_id == GTK_RESPONSE_CLOSE ? TRUE : FALSE));
+
+    gboolean show_warning = !gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(warn_chk_btn));
     GKeyFile *kf = get_kf_ptr ();
     GError *err = NULL;
     if (kf != NULL) {
@@ -368,6 +417,10 @@ set_warn_data (gboolean show_warning)
         g_free (cfg_file_path);
         g_key_file_free (kf);
     }
+    gtk_window_destroy (GTK_WINDOW(dlg));
+    if (loop) {
+        g_main_loop_quit (loop);
+    }
 }
 
 
@@ -382,7 +435,14 @@ create_main_window (gint             width,
     gtk_window_set_default_size (GTK_WINDOW(app_data->main_window), (width >= 150) ? width : 500, (height >= 150) ? height : 300);
 
     GtkWidget *header_bar =  GTK_WIDGET(gtk_builder_get_object (app_data->builder, "headerbar_id"));
-    gtk_header_bar_set_subtitle (GTK_HEADER_BAR(header_bar), PROJECT_VER);
+    GtkWidget *title = gtk_label_new ("OTPClient");
+    gtk_widget_add_css_class (title, "title");
+    GtkWidget *subtitle = gtk_label_new (PROJECT_VER);
+    gtk_widget_add_css_class (subtitle, "subtitle");
+    GtkWidget *vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 1);
+    gtk_box_append (GTK_BOX(vbox), title);
+    gtk_box_append (GTK_BOX(vbox), subtitle);
+    gtk_header_bar_set_title_widget (GTK_HEADER_BAR(header_bar), vbox);
 
     set_action_group (app_data->builder, app_data);
 }
@@ -427,11 +487,6 @@ set_action_group (GtkBuilder *builder,
     g_action_map_add_action_entries (G_ACTION_MAP (add_actions), add_menu_entries, G_N_ELEMENTS (add_menu_entries), app_data);
     gtk_widget_insert_action_group (add_popover, "add_menu", add_actions);
 
-#if GTK_CHECK_VERSION(3, 20, 0)
-    gtk_popover_set_constrain_to (GTK_POPOVER(add_popover), GTK_POPOVER_CONSTRAINT_NONE);
-    gtk_popover_set_constrain_to (GTK_POPOVER(settings_popover), GTK_POPOVER_CONSTRAINT_NONE);
-#endif
-
     return TRUE;
 }
 
@@ -440,22 +495,23 @@ set_action_group (GtkBuilder *builder,
 static gchar *
 get_db_path (AppData *app_data)
 {
-    gchar *db_path = NULL;
-    GError *err = NULL;
-    GKeyFile *kf = g_key_file_new ();
-    gchar *cfg_file_path = g_build_filename (g_get_user_config_dir (), "otpclient.cfg", NULL);
-    if (g_file_test (cfg_file_path, G_FILE_TEST_EXISTS)) {
-        if (!g_key_file_load_from_file (kf, cfg_file_path, G_KEY_FILE_NONE, &err)) {
-            show_message_dialog (app_data->main_window, err->message, GTK_MESSAGE_ERROR);
-            g_key_file_free (kf);
+    GetDBPathData *get_db_path_data = g_new0 (GetDBPathData, 1);
+    get_db_path_data->db_path = NULL;
+    get_db_path_data->err = NULL;
+    get_db_path_data->kf = g_key_file_new ();
+    get_db_path_data->cfg_file_path = g_build_filename (g_get_user_config_dir (), "otpclient.cfg", NULL);
+    if (g_file_test (get_db_path_data->cfg_file_path, G_FILE_TEST_EXISTS)) {
+        if (!g_key_file_load_from_file (get_db_path_data->kf, get_db_path_data->cfg_file_path, G_KEY_FILE_NONE, &get_db_path_data->err)) {
+            show_message_dialog (app_data->main_window, get_db_path_data->err->message, GTK_MESSAGE_ERROR);
+            g_key_file_free (get_db_path_data->kf);
             return NULL;
         }
-        db_path = g_key_file_get_string (kf, "config", "db_path", &err);
-        if (db_path == NULL) {
+        get_db_path_data->db_path = g_key_file_get_string (get_db_path_data->kf, "config", "db_path", &get_db_path_data->err);
+        if (get_db_path_data->db_path == NULL) {
             goto new_db;
         }
-        if (!g_file_test (db_path, G_FILE_TEST_EXISTS)) {
-            gchar *msg = g_strconcat ("Database file/location:\n<b>", db_path, "</b>\ndoes not exist. A new database will be created.", NULL);
+        if (!g_file_test (get_db_path_data->db_path, G_FILE_TEST_EXISTS)) {
+            gchar *msg = g_strconcat ("Database file/location:\n<b>", get_db_path_data->db_path, "</b>\ndoes not exist. A new database will be created.", NULL);
             show_message_dialog (app_data->main_window, msg, GTK_MESSAGE_ERROR);
             g_free (msg);
             goto new_db;
@@ -463,49 +519,57 @@ get_db_path (AppData *app_data)
         goto end;
     }
     new_db: ; // empty statement workaround
-#if GTK_CHECK_VERSION(3, 20, 0)
     GtkFileChooserNative *dialog = gtk_file_chooser_native_new ("Select database location",
                                                                 GTK_WINDOW (app_data->main_window),
                                                                 app_data->open_db_file_action,
                                                                 "OK",
                                                                 "Cancel");
-#else
-    GtkWidget *dialog = gtk_file_chooser_dialog_new ("Select database location",
-                                                        GTK_WINDOW (app_data->main_window),
-                                                        app_data->open_db_file_action,
-                                                        "Cancel", GTK_RESPONSE_CANCEL,
-                                                        "OK", GTK_RESPONSE_ACCEPT,
-                                                        NULL);
-#endif
-    GtkFileChooser *chooser = GTK_FILE_CHOOSER (dialog);
-    gtk_file_chooser_set_do_overwrite_confirmation (chooser, TRUE);
-    gtk_file_chooser_set_select_multiple (chooser, FALSE);
+    get_db_path_data->chooser = GTK_FILE_CHOOSER (dialog);
+    gtk_file_chooser_set_select_multiple (get_db_path_data->chooser, FALSE);
     if (app_data->open_db_file_action == GTK_FILE_CHOOSER_ACTION_SAVE) {
-        gtk_file_chooser_set_current_name (chooser, "NewDatabase.enc");
+        gtk_file_chooser_set_current_name (get_db_path_data->chooser, "NewDatabase.enc");
     }
-#if GTK_CHECK_VERSION(3, 20, 0)
-    gint res = gtk_native_dialog_run (GTK_NATIVE_DIALOG(dialog));
-#else
-    gint res = gtk_dialog_run (GTK_DIALOG (dialog));
-#endif
-    if (res == GTK_RESPONSE_ACCEPT) {
-        db_path = gtk_file_chooser_get_filename (chooser);
-        g_key_file_set_string (kf, "config", "db_path", db_path);
-        g_key_file_save_to_file (kf, cfg_file_path, &err);
-        if (err != NULL) {
-            g_printerr ("%s\n", err->message);
-            g_key_file_free (kf);
-        }
-    }
-#if GTK_CHECK_VERSION(3, 20, 0)
-    g_object_unref (dialog);
-#else
-    gtk_widget_destroy (dialog);
-#endif
+
+    get_db_path_data->loop = g_main_loop_new (NULL, FALSE);
+
+    gtk_native_dialog_show (GTK_NATIVE_DIALOG(dialog));
+    g_signal_connect (dialog, "response", G_CALLBACK (fc_dialog_response), get_db_path_data);
+
+    g_main_loop_run (get_db_path_data->loop);
+    g_main_loop_unref (get_db_path_data->loop);
+    get_db_path_data->loop = NULL;
+
     end:
-    g_free (cfg_file_path);
+    g_free (get_db_path_data->cfg_file_path);
+    gchar *db_path = g_strdup (get_db_path_data->db_path);
+    g_free (get_db_path_data->db_path);
+    g_free (get_db_path_data);
 
     return db_path;
+}
+
+
+static void
+fc_dialog_response (GtkNativeDialog *native,
+                    int              response,
+                    gpointer         user_data)
+{
+    GetDBPathData *get_db_path_data = (GetDBPathData *)user_data;
+    if (response == GTK_RESPONSE_ACCEPT) {
+        GFile *file = gtk_file_chooser_get_file (get_db_path_data->chooser);
+        get_db_path_data->db_path = g_file_get_path (file);
+        g_object_unref (file);
+        g_key_file_set_string (get_db_path_data->kf, "config", "db_path", get_db_path_data->db_path);
+        g_key_file_save_to_file (get_db_path_data->kf, get_db_path_data->cfg_file_path, &get_db_path_data->err);
+        if (get_db_path_data->err != NULL) {
+            g_printerr ("%s\n", get_db_path_data->err->message);
+            g_key_file_free (get_db_path_data->kf);
+        }
+    }
+    g_object_unref (native);
+    if (get_db_path_data->loop) {
+        g_main_loop_quit (get_db_path_data->loop);
+    }
 }
 #endif
 
@@ -529,7 +593,7 @@ del_data_cb (GtkToggleButton *btn,
 
     if (gtk_toggle_button_get_active (btn)) {
         app_data->css_provider = gtk_css_provider_new ();
-        gtk_css_provider_load_from_data (app_data->css_provider, "#delbtn { background: #ff0033; }", -1, NULL);
+        gtk_css_provider_load_from_data (app_data->css_provider, "#delbtn { background: #ff0033; }", -1);
         gtk_style_context_add_provider (gsc, GTK_STYLE_PROVIDER(app_data->css_provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
         const gchar *msg = "You just entered the deletion mode. You can now click on the row(s) you'd like to delete.\n"
             "Please note that once a row has been deleted, <b>it's impossible to recover the associated data.</b>";
@@ -584,7 +648,7 @@ get_window_size_cb (GtkWidget      *window,
                     gpointer        user_data  __attribute__((unused)))
 {
     gint w, h;
-    gtk_window_get_size (GTK_WINDOW(window), &w, &h);
+    gtk_window_get_default_size (GTK_WINDOW(window), &w, &h);
     g_object_set_data (G_OBJECT(window), "width", GINT_TO_POINTER(w));
     g_object_set_data (G_OBJECT(window), "height", GINT_TO_POINTER(h));
 }
@@ -608,7 +672,7 @@ destroy_cb (GtkWidget   *window,
     g_slist_free_full (app_data->db_data->objects_hash, g_free);
     json_decref (app_data->db_data->json_data);
     g_free (app_data->db_data);
-    gtk_clipboard_clear (app_data->clipboard);
+    gdk_clipboard_set_text (app_data->clipboard, "");
     g_application_withdraw_notification (G_APPLICATION(gtk_window_get_application (GTK_WINDOW(app_data->main_window))), NOTIFICATION_ID);
     g_object_unref (app_data->notification);
 #pragma GCC diagnostic push

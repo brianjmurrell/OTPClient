@@ -31,7 +31,7 @@ typedef struct _app_data_t {
     GtkWidget *main_window;
     GtkTreeView *tree_view;
 
-    GtkClipboard *clipboard;
+    GdkClipboard *clipboard;
 
     gboolean show_next_otp;
     gboolean disable_notifications;
@@ -57,6 +57,9 @@ typedef struct _app_data_t {
 
     GtkWidget *diag_rcdb;
     GtkFileChooserAction open_db_file_action;
+
+    GMainLoop *loop;
+    gboolean quit_app;
 } AppData;
 
 G_END_DECLS
