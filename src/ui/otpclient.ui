@@ -411,9 +411,9 @@ Please note that &lt;b&gt;there is no way to recover a forgotten password.&lt;/b
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Select the file with the QR code and copy it (CTRL-C).
+            <property name="label" translatable="yes">Open an image and copy it using CTRL-C.
 
-If you are using &lt;b&gt;KDE&lt;/b&gt;, then you must copy the file &lt;b&gt;before&lt;/b&gt;
+If you are using &lt;b&gt;KDE&lt;/b&gt;, then you must copy the image &lt;b&gt;before&lt;/b&gt;
 selecting this option, otherwise the content won't be parsed.
 
 This dialog will close automatically as soon as a valid qrcode

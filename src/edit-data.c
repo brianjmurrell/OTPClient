@@ -7,17 +7,29 @@
 #include "gui-common.h"
 #include "gquarks.h"
 
-typedef struct _edit_data_t {
+typedef struct edit_data_t {
     GtkListStore *list_store;
     GtkTreeIter iter;
+    GtkWidget *new_lab_entry;
+    GtkWidget *new_iss_entry;
+    AppData *app_data;
     DatabaseData *db_data;
 } EditData;
 
-static void show_edit_dialog (EditData *edit_data, AppData *app_data, gchar *current_label, gchar *current_issuer);
+static void   show_edit_dialog              (EditData    *edit_data,
+                                             AppData     *app_data,
+                                             gchar       *current_label,
+                                             gchar       *current_issuer);
 
-static gchar *get_parse_and_set_data_from_entries (EditData *edit_data, GtkWidget *new_lab_entry, GtkWidget *new_iss_entry);
+static void   parse_entries_cb              (GtkDialog   *dlg,
+                                             gint         response_id,
+                                             gpointer     user_data);
 
-static void set_data_in_lstore_and_json (EditData *edit_data, const gchar *label, const gchar *issuer);
+static gchar *set_data_from_entries         (EditData    *edit_data);
+
+static void   set_data_in_lstore_and_json   (EditData    *edit_data,
+                                             const gchar *label,
+                                             const gchar *issuer);
 
 
 void
@@ -28,6 +40,7 @@ edit_selected_row_cb (GSimpleAction *simple    __attribute__((unused)),
     EditData *edit_data = g_new0 (EditData, 1);
     AppData *app_data = (AppData *)user_data;
     edit_data->db_data = app_data->db_data;
+    edit_data->app_data = app_data;
 
     GtkTreeModel *model = gtk_tree_view_get_model (app_data->tree_view);
 
@@ -51,61 +64,75 @@ edit_selected_row_cb (GSimpleAction *simple    __attribute__((unused)),
 
 
 static void
-show_edit_dialog (EditData *edit_data, AppData *app_data, gchar *current_label, gchar *current_issuer)
+show_edit_dialog (EditData *edit_data,
+                  AppData  *app_data,
+                  gchar    *current_label,
+                  gchar    *current_issuer)
 {
     GtkBuilder *builder = get_builder_from_partial_path (UI_PARTIAL_PATH);
     GtkWidget *diag = GTK_WIDGET (gtk_builder_get_object (builder, "edit_diag_id"));
 
     gtk_window_set_transient_for (GTK_WINDOW(diag), GTK_WINDOW(app_data->main_window));
 
-    GtkWidget *cur_lab_entry = GTK_WIDGET (gtk_builder_get_object (builder, "cur_label_entry"));
-    GtkWidget *cur_iss_entry = GTK_WIDGET (gtk_builder_get_object (builder, "cur_iss_entry"));
+    GtkWidget *cur_lab_entry = GTK_WIDGET(gtk_builder_get_object (builder, "cur_label_entry"));
+    GtkWidget *cur_iss_entry = GTK_WIDGET(gtk_builder_get_object (builder, "cur_iss_entry"));
     if (cur_lab_entry != NULL) {
-        gtk_entry_set_text (GTK_ENTRY (cur_lab_entry), current_label);
+        gtk_editable_set_text (GTK_EDITABLE(cur_lab_entry), current_label);
     }
     if (cur_iss_entry != NULL) {
-        gtk_entry_set_text (GTK_ENTRY (cur_iss_entry), current_issuer);
+        gtk_editable_set_text (GTK_EDITABLE (cur_iss_entry), current_issuer);
     }
 
-    GtkWidget *new_lab_entry = GTK_WIDGET (gtk_builder_get_object (builder, "entry_newlabel_id"));
-    GtkWidget *new_iss_entry = GTK_WIDGET (gtk_builder_get_object (builder, "entry_newissuer_id"));
+    edit_data->new_lab_entry = GTK_WIDGET(gtk_builder_get_object (builder, "entry_newlabel_id"));
+    edit_data->new_iss_entry = GTK_WIDGET(gtk_builder_get_object (builder, "entry_newissuer_id"));
 
     if (current_label != NULL) {
-        gtk_entry_set_text (GTK_ENTRY(new_lab_entry), current_label);
+        gtk_editable_set_text (GTK_EDITABLE(edit_data->new_lab_entry), current_label);
     }
     if (current_issuer != NULL) {
-        gtk_entry_set_text (GTK_ENTRY(new_iss_entry), current_issuer);
+        gtk_editable_set_text (GTK_EDITABLE(edit_data->new_iss_entry), current_issuer);
     }
 
     if (current_issuer != NULL && g_ascii_strcasecmp (current_issuer, "steam") == 0) {
-        gtk_widget_set_sensitive (new_iss_entry, FALSE);
+        gtk_widget_set_sensitive (edit_data->new_iss_entry, FALSE);
     }
 
-    gchar *err_msg = NULL;
-    gint res = gtk_dialog_run (GTK_DIALOG (diag));
-    switch (res) {
-        case GTK_RESPONSE_OK:
-            err_msg = get_parse_and_set_data_from_entries (edit_data, new_lab_entry, new_iss_entry);
-            if (err_msg != NULL) {
-                show_message_dialog (app_data->main_window, err_msg, GTK_MESSAGE_ERROR);
-                g_free (err_msg);
-            }
-            break;
-        case GTK_RESPONSE_CANCEL:
-        default:
-            break;
-    }
+    app_data->loop = g_main_loop_new (NULL, FALSE);
+    g_signal_connect (diag, "response", G_CALLBACK(parse_entries_cb), edit_data);
+    g_main_loop_run (app_data->loop);
+    g_main_loop_unref (app_data->loop);
+    app_data->loop = NULL;
 
-    gtk_widget_destroy (diag);
     g_object_unref (builder);
 }
 
 
-static gchar *
-get_parse_and_set_data_from_entries (EditData *edit_data, GtkWidget *new_lab_entry, GtkWidget *new_iss_entry)
+static void
+parse_entries_cb (GtkDialog *dlg,
+                  gint       response_id,
+                  gpointer   user_data)
 {
-    const gchar *new_label = gtk_entry_get_text (GTK_ENTRY (new_lab_entry));
-    const gchar *new_issuer = gtk_entry_get_text (GTK_ENTRY (new_iss_entry));
+    EditData *edit_data = (EditData *)user_data;
+    gchar *err_msg = NULL;
+    if (response_id == GTK_RESPONSE_OK) {
+        err_msg = set_data_from_entries (edit_data);
+        if (err_msg != NULL) {
+            show_message_dialog (edit_data->app_data->main_window, err_msg, GTK_MESSAGE_ERROR);
+            g_free (err_msg);
+        }
+    }
+    gtk_window_destroy (GTK_WINDOW(dlg));
+    if (edit_data->app_data->loop) {
+        g_main_loop_quit (edit_data->app_data->loop);
+    }
+}
+
+
+static gchar *
+set_data_from_entries (EditData  *edit_data)
+{
+    const gchar *new_label = gtk_editable_get_text (GTK_EDITABLE(edit_data->new_lab_entry));
+    const gchar *new_issuer = gtk_editable_get_text (GTK_EDITABLE(edit_data->new_iss_entry));
 
     if (!g_str_is_ascii (new_label) || !g_str_is_ascii (new_issuer)) {
         return g_strdup ("Only ASCII characters are supported at the moment.");
@@ -122,7 +149,9 @@ get_parse_and_set_data_from_entries (EditData *edit_data, GtkWidget *new_lab_ent
 
 
 static void
-set_data_in_lstore_and_json (EditData *edit_data, const gchar *label, const gchar *issuer)
+set_data_in_lstore_and_json (EditData    *edit_data,
+                             const gchar *label,
+                             const gchar *issuer)
 {
     gtk_list_store_set (edit_data->list_store, &edit_data->iter,
                         COLUMN_ACC_LABEL, label,
