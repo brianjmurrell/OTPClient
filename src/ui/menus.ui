@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <menu id="add_menu_id">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Scan using webcam</attribute>
+        <attribute name="action">add_menu.webcam</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Take screenshot</attribute>
+        <attribute name="action">add_menu.screenshot</attribute>
+      </item>
+      <submenu>
+        <attribute name="label" translatable="yes">From a QR code</attribute>
+        <section>
+          <item>
+            <attribute name="label" translatable="yes">From file</attribute>
+            <attribute name="action">add_menu.import_qr_file</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">From clipboard</attribute>
+            <attribute name="action">add_menu.import_qr_clipboard</attribute>
+          </item>
+        </section>
+      </submenu>
+      <item>
+        <attribute name="label" translatable="yes">Manually</attribute>
+        <attribute name="action">add_menu.manual</attribute>
+      </item>
+    </section>
+  </menu>
+  <object class="GtkPopoverMenu" id="add_popover_id">
+    <property name="has-arrow">1</property>
+    <property name="menu-model">add_pop_id</property>
+  </object>
+  <menu id="hambuger_menu_id">
+    <section>
+      <submenu>
+        <attribute name="label" translatable="yes">Import</attribute>
+        <section>
+          <item>
+            <attribute name="label" translatable="yes">andOTP (encrypted)</attribute>
+            <attribute name="action">settings_menu.import_andotp</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">andOTP (plain json)</attribute>
+            <attribute name="action">settings_menu.import_andotp_plain</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="no">Authenticator Plus</attribute>
+            <attribute name="action">settings_menu.import_authplus</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="no">FreeOTP+ (key URI)</attribute>
+            <attribute name="action">settings_menu.import_freeotpplus</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Aegis (plain json)</attribute>
+            <attribute name="action">settings_menu.import_aegis</attribute>
+          </item>
+        </section>
+      </submenu>
+      <submenu>
+        <attribute name="label" translatable="yes">Export</attribute>
+        <section>
+          <item>
+            <attribute name="label" translatable="yes">andOTP (encrypted)</attribute>
+            <attribute name="action">settings_menu.export_andotp</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">andOTP (plain json)</attribute>
+            <attribute name="action">settings_menu.export_andotp_plain</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="no">FreeOTP+ (key URI)</attribute>
+            <attribute name="action">settings_menu.export_freeotpplus</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Aegis (plain json)</attribute>
+            <attribute name="action">settings_menu.export_aegis</attribute>
+          </item>
+        </section>
+      </submenu>
+      <item>
+        <attribute name="label" translatable="yes">Change password</attribute>
+        <attribute name="action">settings_menu.change_pwd</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Edit row</attribute>
+        <attribute name="action">settings_menu.edit_row</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Settings</attribute>
+        <attribute name="action">settings_menu.settings</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Keyboard shortcuts</attribute>
+        <attribute name="action">settings_menu.shortcuts</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Reset column sorting</attribute>
+        <attribute name="action">settings_menu.reset_sort</attribute>
+      </item>
+    </section>
+  </menu>
+  <object class="GtkPopoverMenu" id="settings_popover_id">
+    <property name="has-arrow">1</property>
+    <property name="menu-model">hambuger_menu_id</property>
+  </object>
+</interface>
