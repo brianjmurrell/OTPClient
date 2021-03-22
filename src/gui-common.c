@@ -2,17 +2,6 @@
 #include <gcrypt.h>
 #include <jansson.h>
 
-
-void
-icon_press_cb (GtkEntry         *entry,
-               gint              position __attribute__((unused)),
-               GdkEventButton   *event    __attribute__((unused)),
-               gpointer          data     __attribute__((unused)))
-{
-    gtk_entry_set_visibility (GTK_ENTRY (entry), !gtk_entry_get_visibility (entry));
-}
-
-
 guint
 get_row_number_from_iter (GtkListStore *list_store,
                           GtkTreeIter iter)
@@ -70,5 +59,5 @@ void
 send_ok_cb (GtkWidget *entry,
             gpointer   user_data __attribute__((unused)))
 {
-    gtk_dialog_response (GTK_DIALOG(gtk_widget_get_toplevel (entry)), GTK_RESPONSE_OK);
+    gtk_dialog_response (GTK_DIALOG(gtk_widget_get_root (entry)), GTK_RESPONSE_OK);
 }
