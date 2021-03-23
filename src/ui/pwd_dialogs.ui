@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkDialog" id="newdb_pwd_diag_id">
+    <property name="title" translatable="yes">Password</property>
+    <child internal-child="content_area">
+      <object class="GtkBox" id="dialog-vbox1_newdb_pwd_diag">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox" id="vbox_ca_newdb_pwd_diag">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel" id="label">
+                <property name="margin-top">10</property>
+                <property name="justify">center</property>
+                <property name="label" translatable="yes">Choose an encryption password for the database.
+Please note that &lt;b&gt;there is no way to recover a forgotten password.&lt;/b&gt;</property>
+                <property name="use-markup">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="newdb_pwd_diag_entry1_id">
+                <property name="tooltip-text" translatable="yes">Max 255 chars</property>
+                <property name="placeholder-text" translatable="yes">Type password...</property>
+                <property name="show-peek-icon">TRUE</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="newdb_pwd_diag_entry2_id">
+                <property name="tooltip-text" translatable="yes">Max 255 chars</property>
+                <property name="placeholder-text" translatable="yes">Retype password...</property>
+                <property name="show-peek-icon">TRUE</property>
+                <property name="margin-bottom">20</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkBox" id="vbox_aa_newdb_pwd_diag">
+        <property name="orientation">horizontal</property>
+        <property name="homogeneous">TRUE</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkButton" id="newdb_pwd_diag_cancel_btn_id">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="newdb_pwd_diag_ok_btn_id">
+            <property name="label" translatable="yes">OK</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">newdb_pwd_diag_cancel_btn_id</action-widget>
+      <action-widget response="ok">newdb_pwd_diag_ok_btn_id</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="decpwd_diag_id">
+    <property name="title" translatable="yes">Password</property>
+    <property name="width-request">400</property>
+    <child internal-child="content_area">
+      <object class="GtkBox" id="dialog-vbox1_decpwd_diag">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox" id="vbox_ca_decpwd_diag">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel" id="decpwd_label_id">
+                <property name="margin-top">5</property>
+                <property name="margin-bottom">5</property>
+                <property name="justify">center</property>
+                <property name="use-markup">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="decpwddiag_entry_id">
+                <property name="tooltip-text" translatable="yes">Max 255 chars</property>
+                <property name="placeholder-text" translatable="yes">Type password...</property>
+                <property name="show-peek-icon">TRUE</property>
+                <property name="margin-bottom">20</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkBox" id="vbox_aa_decpwd_diag">
+        <property name="orientation">horizontal</property>
+        <property name="homogeneous">TRUE</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkButton" id="decpwddiag_cancel_btn_id">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="decpwddiag_ok_btn_id">
+            <property name="label" translatable="yes">OK</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">decpwddiag_cancel_btn_id</action-widget>
+      <action-widget response="ok">decpwddiag_ok_btn_id</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="changepwd_diag_id">
+    <property name="title" translatable="yes">Change password</property>
+    <child internal-child="content_area">
+      <object class="GtkBox" id="dialog-vbox1_changepwd_diag">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox" id="vbox_ca_changepwd_diag">
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkLabel" id="label_changepwd_diag">
+                <property name="margin-top">10</property>
+                <property name="justify">center</property>
+                <property name="label" translatable="yes">Please type the current password, the new one, and again the new one to verify its correctness.
+Please note that &lt;b&gt;there is no way to recover a forgotten password.&lt;/b&gt;</property>
+                <property name="use-markup">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="changepwd_diag_currententry_id">
+                <property name="tooltip-text" translatable="yes">Max 255 chars</property>
+                <property name="placeholder-text" translatable="yes">Type current password...</property>
+                <property name="show-peek-icon">TRUE</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="changepwd_diag_newentry1_id">
+                <property name="tooltip-text" translatable="yes">Max 255 chars</property>
+                <property name="placeholder-text" translatable="yes">Type new password...</property>
+                <property name="show-peek-icon">TRUE</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="changepwd_diag_newentry2_id">
+                <property name="tooltip-text" translatable="yes">Max 255 chars</property>
+                <property name="placeholder-text" translatable="yes">Retype new password...</property>
+                <property name="show-peek-icon">TRUE</property>
+                <property name="margin-bottom">20</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkBox" id="vbox_aa_changepwd_diag">
+        <property name="orientation">horizontal</property>
+        <property name="homogeneous">TRUE</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkButton" id="changepwd_diag_cancel_btn_id">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="changepwd_diag_ok_btn_id">
+            <property name="label" translatable="yes">OK</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">changepwd_diag_cancel_btn_id</action-widget>
+      <action-widget response="ok">changepwd_diag_ok_btn_id</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="unlock_pwd_diag_id">
+    <property name="title" translatable="yes">Password</property>
+    <child internal-child="content_area">
+      <object class="GtkBox" id="dialog-vbox1_unlock_pwd_diag">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox" id="vbox_ca_unlock_pwd_diag">
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkLabel" id="unlock_label_id">
+                <property name="margin-top">5</property>
+                <property name="margin-bottom">5</property>
+                <property name="justify">center</property>
+                <property name="label" translatable="yes">The application is &lt;b&gt;locked&lt;/b&gt;.
+Please type your password to unlock it</property>
+                <property name="use-markup">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="unlock_entry_id">
+                <property name="tooltip-text" translatable="yes">Max 255 chars</property>
+                <property name="placeholder-text" translatable="yes">Type password...</property>
+                <property name="show-peek-icon">TRUE</property>
+                <property name="margin-bottom">15</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkBox" id="vbox_aa_unlock_pwd_diag">
+        <property name="orientation">horizontal</property>
+        <property name="homogeneous">TRUE</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkButton" id="unlock_diag_quit_btn_id">
+            <property name="label" translatable="yes">Quit</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="unlock_diag_unlock_btn_id">
+            <property name="label" translatable="yes">Unlock</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="close">unlock_diag_quit_btn_id</action-widget>
+      <action-widget response="ok">unlock_diag_unlock_btn_id</action-widget>
+    </action-widgets>
+  </object>
+</interface>
