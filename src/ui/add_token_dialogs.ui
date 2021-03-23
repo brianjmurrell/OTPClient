@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkDialog" id="diag_qr_clipboard_id">
+    <property name="title" translatable="yes">Scan using webcam</property>
+    <child internal-child="content_area">
+      <object class="GtkBox" id="box1">
+      <property name="orientation">vertical</property>
+      <child>
+        <object class="GtkLabel" id="label1">
+          <property name="margin-top">5</property>
+          <property name="margin-bottom">5</property>
+          <property name="justify">center</property>
+          <property name="use-markup">True</property>
+          <property name="margin-bottom">10</property>
+          <property name="label" translatable="yes">Open an image and copy it using CTRL-C.
+
+If you are using &lt;b&gt;KDE&lt;/b&gt;, then you must copy the image &lt;b&gt;before&lt;/b&gt;
+selecting this option, otherwise the content won't be parsed.
+
+This dialog will close automatically as soon as a valid qrcode
+has been found or after 30 seconds if nothing has been detected.</property>
+        </object>
+      </child>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="cancel_btn_qrclipb_id">
+        <property name="label" translatable="yes">Cancel</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">cancel_btn_qrclipb_id</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="diag_webcam_id">
+    <property name="title" translatable="yes">Scan using webcam</property>
+    <child internal-child="content_area">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="label2">
+            <property name="margin-top">5</property>
+            <property name="margin-bottom">5</property>
+            <property name="justify">center</property>
+            <property name="use-markup">True</property>
+            <property name="margin-bottom">10</property>
+            <property name="label" translatable="yes">Please place the qrcode &lt;b&gt;in front of the webcam&lt;/b&gt;.
+This dialog will automatically close as soon as a valid qrcode
+has been found or after 30 seconds if nothing has been detected.</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="cancel_btn_webcam_id">
+        <property name="label" translatable="yes">Cancel</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">cancel_btn_webcam_id</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="manual_add_diag_id">
+    <property name="title" translatable="yes">Add Token</property>
+    <child internal-child="content_area">
+      <object class="GtkBox">
+      <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">2</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <object class="GtkComboBoxText" id="otp_combotext_id">
+                    <property name="name">otp_cb</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="active">0</property>
+                    <items>
+                      <item id="0" translatable="yes">TOTP</item>
+                      <item id="1" translatable="yes">HOTP</item>
+                    </items>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkComboBoxText" id="algo_combotext_id">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="active">0</property>
+                    <items>
+                      <item id="0" translatable="yes">SHA1</item>
+                      <item id="1" translatable="yes">SHA256</item>
+                      <item id="2" translatable="yes">SHA512</item>
+                    </items>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="steam_ck_btn">
+                    <property name="label" translatable="yes">This is a Steam code</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">False</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="manual_diag_label_entry_id">
+                <property name="placeholder-text" translatable="yes">Account</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="manual_diag_issuer_entry_id">
+                <property name="placeholder-text" translatable="yes">Issuer</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkPasswordEntry" id="manual_diag_secret_entry_id">
+                <property name="tooltip-text" translatable="yes">Max 255 chars</property>
+                <property name="placeholder-text" translatable="yes">Secret</property>
+                <property name="show-peek-icon">TRUE</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="margin-top">2</property>
+                <property name="spacing">2</property>
+                <property name="homogeneous">True</property>
+                <property name="orientation">horizontal</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Digits</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="digits_entry_manual_diag">
+                        <property name="tooltip-text" translatable="yes">Between 4 and 10</property>
+                        <property name="max-length">2</property>
+                        <property name="text" translatable="yes">6</property>
+                        <property name="input-purpose">digits</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                  <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Period</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="period_entry_manual_diag">
+                        <property name="tooltip-text" translatable="yes">In seconds between 10 and 120</property>
+                        <property name="max-length">3</property>
+                        <property name="text" translatable="yes">30</property>
+                        <property name="input-purpose">digits</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="label" translatable="yes">Counter</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="counter_entry_manual_diag">
+                        <property name="tooltip-text" translatable="yes">Value decided by the server (HOTP only)</property>
+                        <property name="input-purpose">digits</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="homogeneous">TRUE</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkButton" id="manual_diag_cancel_btn_id">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="manual_diag_ok_btn_id">
+            <property name="label" translatable="yes">OK</property>
+            <property name="receives-default">True</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">manual_diag_cancel_btn_id</action-widget>
+      <action-widget response="ok">manual_diag_ok_btn_id</action-widget>
+    </action-widgets>
+  </object>
+</interface>
