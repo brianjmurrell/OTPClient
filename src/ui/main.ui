@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="3.24"/>
-  <object class="GtkImage" id="lrs_image">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">list-remove-symbolic</property>
-  </object>
+  <requires lib="gtk" version="4.0"/>
   <object class="GtkApplicationWindow" id="appwindow_id">
-    <property name="can-focus">False</property>
-    <property name="window-position">center</property>
     <property name="default-width">500</property>
     <property name="default-height">350</property>
-    <property name="gravity">center</property>
     <child>
       <object class="GtkScrolledWindow" id="scrolledwin_id">
         <property name="visible">True</property>
         <property name="can-focus">True</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
-        <property name="shadow-type">etched-in</property>
         <child>
           <object class="GtkTreeView" id="treeview_id">
             <property name="visible">True</property>
@@ -40,7 +30,8 @@
       <object class="GtkHeaderBar" id="headerbar_id">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="show-close-button">True</property>
+        <property name="show-title-buttons">TRUE</property>
+        <property name="decoration-layout">menu:close</property>
         <child type="title">
           <placeholder/>
         </child>
@@ -54,20 +45,8 @@
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
                 <property name="tooltip-text" translatable="yes">Add token</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="icon-name">list-add-symbolic</property>
-                  </object>
-                </child>
-                <accelerator key="a" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+                <property name="icon-name">list-add-symbolic</property>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkToggleButton" id="del_toggle_btn_id">
@@ -76,38 +55,22 @@
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
                 <property name="tooltip-text" translatable="yes">Toggle delete rows</property>
-                <property name="image">lrs_image</property>
+                <property name="icon-name">list-remove-symbolic</property>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
             <style>
               <class name="linked"/>
             </style>
           </object>
         </child>
-        <child>
+        <child type="end">
           <object class="GtkMenuButton" id="settings_btn_id">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
             <property name="tooltip-text" translatable="yes">Settings</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="icon-name">open-menu-symbolic</property>
-              </object>
-            </child>
-            <accelerator key="m" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+            <property name="icon-name">open-menu-symbolic</property>
           </object>
-          <packing>
-            <property name="pack-type">end</property>
-            <property name="position">1</property>
-          </packing>
         </child>
       </object>
     </child>
