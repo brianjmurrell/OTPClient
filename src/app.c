@@ -477,12 +477,12 @@ set_action_group (GtkBuilder *builder,
             { .name = "manual", .activate = add_data_dialog }
     };
 
-    GtkWidget *settings_popover = GTK_WIDGET (gtk_builder_get_object (builder, "settings_pop_id"));
+    GtkWidget *settings_popover = GTK_WIDGET (gtk_builder_get_object (builder, "settings_popover_id"));
     GActionGroup *settings_actions = (GActionGroup *)g_simple_action_group_new ();
     g_action_map_add_action_entries (G_ACTION_MAP (settings_actions), settings_menu_entries, G_N_ELEMENTS (settings_menu_entries), app_data);
     gtk_widget_insert_action_group (settings_popover, "settings_menu", settings_actions);
 
-    GtkWidget *add_popover = GTK_WIDGET (gtk_builder_get_object (builder, "add_pop_id"));
+    GtkWidget *add_popover = GTK_WIDGET (gtk_builder_get_object (builder, "add_popover_id"));
     GActionGroup *add_actions = (GActionGroup *)g_simple_action_group_new ();
     g_action_map_add_action_entries (G_ACTION_MAP (add_actions), add_menu_entries, G_N_ELEMENTS (add_menu_entries), app_data);
     gtk_widget_insert_action_group (add_popover, "add_menu", add_actions);

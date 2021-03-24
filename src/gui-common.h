@@ -5,11 +5,6 @@
 
 G_BEGIN_DECLS
 
-void         icon_press_cb              (GtkEntry       *entry,
-                                         gint            position,
-                                         GdkEventButton *event,
-                                         gpointer        data);
-
 guint        get_row_number_from_iter   (GtkListStore   *list_store,
                                          GtkTreeIter     iter);
 
