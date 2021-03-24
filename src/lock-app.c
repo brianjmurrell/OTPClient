@@ -1,5 +1,4 @@
 #include <glib.h>
-#include <glib/gstdio.h>
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 #include "data.h"
@@ -9,54 +8,79 @@
 #include "otpclient.h"
 #include "lock-app.h"
 
+typedef struct lock_data_t {
+    gint dialog_ret_code;
+    gboolean retry;
+    GtkWidget *pwd_entry;
+    GtkBuilder *builder;
+    AppData *app_data;
+} LockData;
+
+static void run_lock_dialog (GtkDialog *dlg,
+                             gint       response_id,
+                             gpointer   user_data);
 
 static void
 lock_app (GtkWidget *w __attribute__((unused)),
           gpointer user_data)
 {
     AppData *app_data = (AppData *)user_data;
+    LockData *lock_data = g_new0 (LockData, 1);
+
+    lock_data->app_data = app_data;
 
     app_data->app_locked = TRUE;
 
     g_signal_emit_by_name (app_data->tree_view, "hide-all-otps");
 
-    GtkBuilder *builder = get_builder_from_partial_path (UI_PARTIAL_PATH);
+    lock_data->builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "pwd_dialogs.ui", NULL));
 
-    GtkWidget *dialog = GTK_WIDGET(gtk_builder_get_object (builder, "unlock_pwd_diag_id"));
-    GtkWidget *pwd_entry = GTK_WIDGET(gtk_builder_get_object (builder, "unlock_entry_id"));
+    GtkWidget *dialog = GTK_WIDGET(gtk_builder_get_object (lock_data->builder, "unlock_pwd_diag_id"));
+    lock_data->pwd_entry = GTK_WIDGET(gtk_builder_get_object (lock_data->builder, "unlock_entry_id"));
 
-    g_signal_connect (pwd_entry, "icon-press", G_CALLBACK (icon_press_cb), NULL);
-    g_signal_connect (pwd_entry, "activate", G_CALLBACK (send_ok_cb), NULL);
+    g_signal_connect (lock_data->pwd_entry, "activate", G_CALLBACK (send_ok_cb), NULL);
 
     gtk_window_set_transient_for (GTK_WINDOW(dialog), GTK_WINDOW(app_data->main_window));
 
-    gtk_widget_show_all (dialog);
-
-    gint ret;
-    gboolean retry = FALSE;
+    lock_data->retry = FALSE;
     do {
-        ret = gtk_dialog_run (GTK_DIALOG(dialog));
-        if (ret == GTK_RESPONSE_OK) {
-            if (g_strcmp0 (app_data->db_data->key, gtk_entry_get_text (GTK_ENTRY(pwd_entry))) != 0) {
-                show_message_dialog (dialog, "The password is wrong, please try again.", GTK_MESSAGE_ERROR);
-                gtk_entry_set_text (GTK_ENTRY(pwd_entry), "");
-                retry = TRUE;
-            } else {
-                retry = FALSE;
-                app_data->app_locked = FALSE;
-                app_data->last_user_activity = g_date_time_new_now_local ();
-                app_data->source_id_last_activity = g_timeout_add_seconds (1, check_inactivity, app_data);
-                gtk_widget_destroy (dialog);
-                g_object_unref (builder);
-            }
+        app_data->loop = g_main_loop_new (NULL, FALSE);
+        g_signal_connect (dialog, "response", G_CALLBACK(run_lock_dialog), lock_data);
+        g_main_loop_run (app_data->loop);
+        g_main_loop_unref (app_data->loop);
+        app_data->loop = NULL;
+    } while (lock_data->dialog_ret_code == GTK_RESPONSE_OK && lock_data->retry == TRUE);
+}
+
+
+static void
+run_lock_dialog (GtkDialog *dlg,
+                 gint       response_id,
+                 gpointer   user_data)
+{
+    LockData *lock_data = (LockData *)user_data;
+    if (response_id == GTK_RESPONSE_OK) {
+        if (g_strcmp0 (lock_data->app_data->db_data->key, gtk_editable_get_text (GTK_EDITABLE(lock_data->pwd_entry))) != 0) {
+            show_message_dialog (GTK_WIDGET(dlg), "The password is wrong, please try again.", GTK_MESSAGE_ERROR);
+            gtk_editable_set_text (GTK_EDITABLE(lock_data->pwd_entry), "");
+            lock_data->retry = TRUE;
         } else {
-            gtk_widget_destroy (dialog);
-            g_object_unref (builder);
-            GtkApplication *app = gtk_window_get_application (GTK_WINDOW (app_data->main_window));
-            destroy_cb (app_data->main_window, app_data);
-            g_application_quit (G_APPLICATION(app));
+            lock_data->retry = FALSE;
+            lock_data->app_data->app_locked = FALSE;
+            lock_data->app_data->last_user_activity = g_date_time_new_now_local ();
+            lock_data->app_data->source_id_last_activity = g_timeout_add_seconds (1, check_inactivity, lock_data->app_data);
+            g_object_unref (lock_data->builder);
+            g_free (lock_data);
+            gtk_window_destroy (GTK_WINDOW(dlg));
         }
-    } while (ret == GTK_RESPONSE_OK && retry == TRUE);
+    } else {
+        gtk_window_destroy (GTK_WINDOW(dlg));
+        g_object_unref (lock_data->builder);
+        GtkApplication *app = gtk_window_get_application (GTK_WINDOW (lock_data->app_data->main_window));
+        destroy_cb (lock_data->app_data->main_window, lock_data->app_data);
+        g_free (lock_data);
+        g_application_quit (G_APPLICATION(app));
+    }
 }
 
 
@@ -102,8 +126,7 @@ setup_dbus_listener (AppData *app_data)
     g_signal_new ("lock-app", G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
     g_signal_connect (app_data->main_window, "lock-app", G_CALLBACK(lock_app), app_data);
 
-    GtkBindingSet *binding_set = gtk_binding_set_by_class (GTK_WIDGET_GET_CLASS (app_data->main_window));
-    gtk_binding_entry_add_signal (binding_set, GDK_KEY_l, GDK_CONTROL_MASK, "lock-app", 0);
+    gtk_widget_class_add_binding_signal (GTK_WIDGET_CLASS(app_data->main_window), GDK_KEY_l, GDK_CONTROL_MASK, "lock-app", NULL);
 
     //const gchar *services[] = { "org.cinnamon.ScreenSaver", "org.freedesktop.ScreenSaver", "org.gnome.ScreenSaver", "com.canonical.Unity" };
     const gchar *paths[] = { "/org/cinnamon/ScreenSaver", "/org/freedesktop/ScreenSaver", "/org/gnome/ScreenSaver", "/com/canonical/Unity/Session" };

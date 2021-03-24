@@ -95,6 +95,7 @@ prompt_for_password (AppData        *app_data,
         g_signal_connect (dialog, "response", G_CALLBACK(run_dialog), entry_widgets);
         g_main_loop_run (app_data->loop);
         g_main_loop_unref (app_data->loop);
+        app_data->loop = NULL;
     } while (entry_widgets->diag_ret_code == GTK_RESPONSE_OK && entry_widgets->retry == TRUE);
 
     gchar *pwd = NULL;
