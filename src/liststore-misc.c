@@ -8,7 +8,7 @@
 #include "common/common.h"
 
 
-typedef struct _otp_data {
+typedef struct otp_data {
     gchar *type;
     gchar *secret;
     gchar *algo;

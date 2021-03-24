@@ -8,7 +8,7 @@
 #include "gquarks.h"
 #include "common/common.h"
 
-typedef struct _header_data {
+typedef struct header_data {
     guint8 iv[IV_SIZE];
     guint8 salt[KDF_SALT_SIZE];
 } HeaderData;

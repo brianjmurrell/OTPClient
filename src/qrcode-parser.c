@@ -4,7 +4,7 @@
 #include <glib/gstdio.h>
 #include "gui-common.h"
 
-typedef struct _image_data_t {
+typedef struct image_data_t {
     guint width;
     guint height;
     guchar *raw_data;

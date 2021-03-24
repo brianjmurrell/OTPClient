@@ -1,7 +1,6 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
-#include <zbar.h>
 #include <png.h>
 #include <gcrypt.h>
 #include "imports.h"
