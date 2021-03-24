@@ -2,11 +2,10 @@
 #include <jansson.h>
 #include "otpclient.h"
 #include "liststore-misc.h"
-#include "gui-common.h"
 #include "message-dialogs.h"
 
 
-typedef struct _parsed_json_data {
+typedef struct parsed_json_data {
     gchar **types;
     gchar **labels;
     gchar **issuers;
@@ -41,8 +40,7 @@ create_treeview (AppData *app_data)
 
     app_data->tree_view = GTK_TREE_VIEW(gtk_builder_get_object (app_data->builder, "treeview_id"));
 
-    GtkBindingSet *binding_set = gtk_binding_set_by_class (GTK_TREE_VIEW_GET_CLASS(app_data->tree_view));
-    gtk_binding_entry_add_signal (binding_set, GDK_KEY_h, GDK_CONTROL_MASK, "hide-all-otps", 0);
+    gtk_widget_class_add_binding_signal (GTK_WIDGET_CLASS(app_data->tree_view), GDK_KEY_h, GDK_CONTROL_MASK, "hide-all-otps", NULL);
 
     GtkListStore *list_store = gtk_list_store_new (NUM_COLUMNS, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
                                                    G_TYPE_UINT, G_TYPE_UINT, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN, G_TYPE_INT);
@@ -162,7 +160,7 @@ row_selected_cb (GtkTreeView        *tree_view,
         gtk_tree_model_get (model, &iter, COLUMN_OTP, &otp_value, -1);
     }
     // and, in any case, we copy the otp to the clipboard and send a notification
-    gtk_clipboard_set_text (app_data->clipboard, otp_value, -1);
+    gdk_clipboard_set_text (app_data->clipboard, otp_value);
     if (!app_data->disable_notifications) {
         g_application_send_notification (G_APPLICATION(gtk_window_get_application (GTK_WINDOW(app_data->main_window))), NOTIFICATION_ID, app_data->notification);
     }
