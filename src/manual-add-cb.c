@@ -1,16 +1,26 @@
 #include <gtk/gtk.h>
 #include "db-misc.h"
-#include "gui-common.h"
 #include "manual-add-cb.h"
 #include "gquarks.h"
 #include "message-dialogs.h"
 #include "get-builder.h"
 
-static void changed_otp_cb      (GtkWidget *cb,
-                                 gpointer   user_data);
+typedef struct packed_data_t {
+    Widgets  *widgets;
+    AppData *app_data;
+    gboolean retry;
+    gint diag_response_code;
+} PackedData;
 
-static void steam_toggled_cb    (GtkWidget *        __attribute__((unused)),
-                                 gpointer   user_data);
+static void run_add_data_diag  (GtkDialog *dlg,
+                                gint       response_id,
+                                gpointer   user_data);
+
+static void changed_otp_cb     (GtkWidget *cb,
+                                gpointer   user_data);
+
+static void steam_toggled_cb   (GtkWidget *ck_btn,
+                                gpointer   user_data);
 
 
 void
@@ -20,6 +30,11 @@ add_data_dialog (GSimpleAction *simple    __attribute__((unused)),
 {
     AppData *app_data = (AppData *)user_data;
     Widgets *widgets = g_new0 (Widgets, 1);
+    PackedData *packed_data = g_new0 (PackedData, 1);
+
+    packed_data->widgets = widgets;
+    packed_data->app_data = app_data;
+    packed_data->retry = TRUE;
 
     GtkBuilder *builder = get_builder_from_partial_path (UI_PARTIAL_PATH);
     widgets->dialog = GTK_WIDGET(gtk_builder_get_object (builder, "manual_add_diag_id"));
@@ -36,29 +51,43 @@ add_data_dialog (GSimpleAction *simple    __attribute__((unused)),
 
     gtk_window_set_transient_for (GTK_WINDOW(widgets->dialog), GTK_WINDOW(app_data->main_window));
 
-    g_signal_connect (widgets->sec_entry, "icon-press", G_CALLBACK(icon_press_cb), NULL);
     g_signal_connect (widgets->otp_cb, "changed", G_CALLBACK(changed_otp_cb), widgets);
     g_signal_connect (widgets->steam_ck, "toggled", G_CALLBACK(steam_toggled_cb), widgets);
 
-    GError *err = NULL;
-    gboolean retry = TRUE;
-    gint result;
     do {
-        result = gtk_dialog_run (GTK_DIALOG(widgets->dialog));
-        if (result == GTK_RESPONSE_OK) {
-            if (parse_user_data (widgets, app_data->db_data)) {
-                update_and_reload_db (app_data, app_data->db_data, TRUE, &err);
-                if (err != NULL && !g_error_matches (err, missing_file_gquark (), MISSING_FILE_CODE)) {
-                    show_message_dialog (app_data->main_window, err->message, GTK_MESSAGE_ERROR);
-                }
-                retry = FALSE;
-            }
-        }
-    } while (result == GTK_RESPONSE_OK && retry == TRUE);
+        app_data->loop = g_main_loop_new (NULL, FALSE);
+        g_signal_connect (widgets->dialog, "response", G_CALLBACK(run_add_data_diag), packed_data);
+        g_main_loop_run (app_data->loop);
+        g_main_loop_unref (app_data->loop);
+        app_data->loop = NULL;
+    } while (packed_data->diag_response_code == GTK_RESPONSE_OK && packed_data->retry == TRUE);
 
-    gtk_widget_destroy (widgets->dialog);
+    gtk_window_destroy (GTK_WINDOW(widgets->dialog));
     g_free (widgets);
+    g_free (packed_data);
     g_object_unref (builder);
+}
+
+
+static void
+run_add_data_diag  (GtkDialog *dlg __attribute__((unused)),
+                     gint       response_id,
+                     gpointer   user_data)
+{
+    PackedData *packed_data = (PackedData *)user_data;
+    GError *err = NULL;
+    if (response_id == GTK_RESPONSE_OK) {
+        if (parse_user_data (packed_data->widgets, packed_data->app_data->db_data)) {
+            update_and_reload_db (packed_data->app_data, packed_data->app_data->db_data, TRUE, &err);
+            if (err != NULL && !g_error_matches (err, missing_file_gquark (), MISSING_FILE_CODE)) {
+                show_message_dialog (packed_data->app_data->main_window, err->message, GTK_MESSAGE_ERROR);
+            }
+            packed_data->retry = FALSE;
+        }
+    }
+    if (packed_data->app_data->loop) {
+        g_main_loop_quit (packed_data->app_data->loop);
+    }
 }
 
 
@@ -74,7 +103,7 @@ changed_otp_cb (GtkWidget *cb,
 
 
 static void
-steam_toggled_cb (GtkWidget *ck_btn     __attribute__((unused)),
+steam_toggled_cb (GtkWidget *ck_btn __attribute__((unused)),
                   gpointer   user_data)
 {
     Widgets *widgets = (Widgets *)user_data;
@@ -88,13 +117,13 @@ steam_toggled_cb (GtkWidget *ck_btn     __attribute__((unused)),
     if (button_toggled) {
         gtk_combo_box_set_active (GTK_COMBO_BOX(widgets->otp_cb), 0); // TOTP
         gtk_combo_box_set_active (GTK_COMBO_BOX(widgets->algo_cb), 0); // SHA1
-        gtk_entry_set_text (GTK_ENTRY(widgets->iss_entry), "Steam");
-        gtk_entry_set_text (GTK_ENTRY(widgets->period_entry), "30");
-        gtk_entry_set_text (GTK_ENTRY(widgets->digits_entry), "5");
+        gtk_editable_set_text (GTK_EDITABLE(widgets->iss_entry), "Steam");
+        gtk_editable_set_text (GTK_EDITABLE(widgets->period_entry), "30");
+        gtk_editable_set_text (GTK_EDITABLE(widgets->digits_entry), "5");
     } else {
-        gtk_entry_set_text (GTK_ENTRY(widgets->iss_entry), "");
-        gtk_entry_set_text (GTK_ENTRY(widgets->digits_entry), "");
-        gtk_entry_set_text (GTK_ENTRY(widgets->period_entry), "");
-        gtk_entry_set_text (GTK_ENTRY(widgets->counter_entry), "");
+        gtk_editable_set_text (GTK_EDITABLE(widgets->iss_entry), "");
+        gtk_editable_set_text (GTK_EDITABLE(widgets->digits_entry), "");
+        gtk_editable_set_text (GTK_EDITABLE(widgets->period_entry), "");
+        gtk_editable_set_text (GTK_EDITABLE(widgets->counter_entry), "");
     }
 }
