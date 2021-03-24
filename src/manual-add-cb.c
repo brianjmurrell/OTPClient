@@ -54,6 +54,8 @@ add_data_dialog (GSimpleAction *simple    __attribute__((unused)),
     g_signal_connect (widgets->otp_cb, "changed", G_CALLBACK(changed_otp_cb), widgets);
     g_signal_connect (widgets->steam_ck, "toggled", G_CALLBACK(steam_toggled_cb), widgets);
 
+    gtk_widget_show (widgets->dialog);
+
     do {
         app_data->loop = g_main_loop_new (NULL, FALSE);
         g_signal_connect (widgets->dialog, "response", G_CALLBACK(run_add_data_diag), packed_data);

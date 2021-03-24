@@ -90,6 +90,8 @@ prompt_for_password (AppData        *app_data,
 
     gtk_window_set_transient_for (GTK_WINDOW(dialog), GTK_WINDOW(app_data->main_window));
 
+    gtk_widget_show (dialog);
+
     do {
         app_data->loop = g_main_loop_new (NULL, FALSE);
         g_signal_connect (dialog, "response", G_CALLBACK(run_dialog), entry_widgets);
