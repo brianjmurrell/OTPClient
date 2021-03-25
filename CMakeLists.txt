@@ -198,8 +198,11 @@ endif()
 install(FILES data/com.github.paolostivanin.OTPClient.desktop DESTINATION share/applications)
 install(FILES data/com.github.paolostivanin.OTPClient.appdata.xml DESTINATION share/metainfo)
 
-install(FILES src/ui/otpclient.ui DESTINATION share/otpclient)
+install(FILES src/ui/main.ui DESTINATION share/otpclient)
 install(FILES src/ui/shortcuts.ui DESTINATION share/otpclient)
+install(FILES src/ui/add_token_dialogs.ui DESTINATION share/otpclient)
+install(FILES src/ui/misc_diags.ui DESTINATION share/otpclient)
+install(FILES src/ui/pwd_dialogs.ui DESTINATION share/otpclient)
 
 install(FILES man/otpclient.1.gz DESTINATION share/man/man1)
 install(FILES man/otpclient-cli.1.gz DESTINATION share/man/man1)
