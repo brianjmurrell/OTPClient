@@ -27,7 +27,6 @@ settings_dialog_cb (GSimpleAction *simple    __attribute__((unused)),
     AppData *app_data = (AppData *)user_data;
     SettingsData *settings_data = g_new0 (SettingsData, 1);
 
-    settings_data->cfg_file_path;
 #ifndef USE_FLATPAK_APP_FOLDER
     settings_data->cfg_file_path = g_build_filename (g_get_user_config_dir (), "otpclient.cfg", NULL);
 #else
@@ -52,7 +51,7 @@ settings_dialog_cb (GSimpleAction *simple    __attribute__((unused)),
     app_data->auto_lock = g_key_file_get_boolean (settings_data->kf, "config", "auto_lock", NULL);
     app_data->inactivity_timeout = g_key_file_get_integer (settings_data->kf, "config", "inactivity_timeout", NULL);
 
-    GtkBuilder *builder = get_builder_from_partial_path(g_strconcat (UI_PARTIAL_PATH, "misc_diags.ui", NULL);
+    GtkBuilder *builder = get_builder_from_partial_path(g_strconcat (UI_PARTIAL_PATH, "misc_diags.ui", NULL));
     GtkWidget *dialog = GTK_WIDGET(gtk_builder_get_object (builder, "settings_diag_id"));
     settings_data->sno_switch = GTK_WIDGET(gtk_builder_get_object (builder, "nextotp_switch_id"));
     settings_data->dn_switch = GTK_WIDGET(gtk_builder_get_object (builder, "notif_switch_id"));

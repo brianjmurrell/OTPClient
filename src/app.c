@@ -308,7 +308,10 @@ show_memlock_warn_dialog (gint32      max_file_size,
     g_main_loop_unref (loop);
     loop = NULL;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wbad-function-cast"
     gboolean quit = GPOINTER_TO_INT(g_queue_pop_head (queue));
+#pragma GCC diagnostic pop
     g_free (msg);
     g_queue_free (queue);
 
