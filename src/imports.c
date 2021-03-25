@@ -10,6 +10,9 @@
 #include "db-misc.h"
 #include "common/get-providers-data.h"
 
+static void      run_select_file_diag       (GtkDialog *dlg,
+                                             gint       response_id,
+                                             gpointer   user_data);
 
 static gboolean  parse_data_and_update_db    (AppData       *app_data,
                                               const gchar   *filename,
@@ -24,15 +27,6 @@ select_file_cb (GSimpleAction *simple,
     const gchar *action_name = g_action_get_name (G_ACTION(simple));
     AppData *app_data = (AppData *)user_data;
 
-#if GTK_CHECK_VERSION(3, 20, 0)
-    GtkFileChooserNative *dialog = gtk_file_chooser_native_new ("Open File",
-                                                     GTK_WINDOW(app_data->main_window),
-                                                     GTK_FILE_CHOOSER_ACTION_OPEN,
-                                                     "Open",
-                                                     "Cancel");
-
-    gint res = gtk_native_dialog_run (GTK_NATIVE_DIALOG(dialog));
-#else
     GtkWidget *dialog = gtk_file_chooser_dialog_new ("Open File",
                                                      GTK_WINDOW(app_data->main_window),
                                                      GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -40,19 +34,37 @@ select_file_cb (GSimpleAction *simple,
                                                      "Open", GTK_RESPONSE_ACCEPT,
                                                      NULL);
 
-    gint res = gtk_dialog_run (GTK_DIALOG(dialog));
-#endif
-    if (res == GTK_RESPONSE_ACCEPT) {
-        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dialog);
-        gchar *filename = gtk_file_chooser_get_filename (chooser);
-        parse_data_and_update_db (app_data, filename, action_name);
-        g_free (filename);
+    gtk_widget_show (dialog);
+
+    g_object_set_data (G_OBJECT(dialog), "actio_name", (gpointer)action_name);
+
+    app_data->loop = g_main_loop_new (NULL, FALSE);
+    g_signal_connect (dialog, "response", G_CALLBACK(run_select_file_diag), app_data);
+    g_main_loop_run (app_data->loop);
+    g_main_loop_unref (app_data->loop);
+    app_data->loop = NULL;
+
+    gtk_window_destroy (GTK_WINDOW(dialog));
+}
+
+
+static void
+run_select_file_diag (GtkDialog *dlg,
+                      gint       response_id,
+                      gpointer   user_data)
+{
+    AppData *app_data = (AppData *)user_data;
+    if (response_id == GTK_RESPONSE_ACCEPT) {
+        GtkFileChooser *chooser = GTK_FILE_CHOOSER(dlg);
+        g_autoptr(GFile) gfile = NULL;
+        gfile = gtk_file_chooser_get_file (chooser);
+        g_autofree gchar *file_path = NULL;
+        file_path = g_file_get_path (gfile);
+        parse_data_and_update_db (app_data, file_path, (gchar *)g_object_get_data (G_OBJECT(dlg), "action_name"));
     }
-#if GTK_CHECK_VERSION(3, 20, 0)
-    g_object_unref (dialog);
-#else
-    gtk_widget_destroy (dialog);
-#endif
+    if (app_data->loop) {
+        g_main_loop_quit (app_data->loop);
+    }
 }
 
 
