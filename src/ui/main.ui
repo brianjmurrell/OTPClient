@@ -46,6 +46,7 @@
                 <property name="receives-default">True</property>
                 <property name="tooltip-text" translatable="yes">Add token</property>
                 <property name="icon-name">list-add-symbolic</property>
+                <property name="popover">add_popover_id</property>
               </object>
             </child>
             <child>
@@ -106,7 +107,6 @@
   </menu>
   <object class="GtkPopoverMenu" id="add_popover_id">
     <property name="has-arrow">1</property>
-    <property name="menu-model">add_pop_id</property>
   </object>
   <menu id="hambuger_menu_id">
     <section>

@@ -257,6 +257,8 @@ activate (GtkApplication    *app,
     // set last user activity to now, so we have a starting point for the autolock feature
     app_data->last_user_activity = g_date_time_new_now_local ();
     app_data->source_id_last_activity = g_timeout_add_seconds (1, check_inactivity, app_data);
+
+    gtk_widget_show (app_data->main_window);
 }
 
 
