@@ -69,7 +69,7 @@ show_edit_dialog (EditData *edit_data,
                   gchar    *current_label,
                   gchar    *current_issuer)
 {
-    GtkBuilder *builder = get_builder_from_partial_path (UI_PARTIAL_PATH);
+    GtkBuilder *builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "misc_diags.ui", NULL));
     GtkWidget *diag = GTK_WIDGET (gtk_builder_get_object (builder, "edit_diag_id"));
 
     gtk_window_set_transient_for (GTK_WINDOW(diag), GTK_WINDOW(app_data->main_window));

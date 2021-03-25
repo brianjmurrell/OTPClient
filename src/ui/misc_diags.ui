@@ -1,49 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <object class="GtkDialog" id="dialog_rcdb_id">
-    <property name="title" translatable="yes">Database location</property>
-    <child internal-child="content_area">
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
-        <property name="spacing">5</property>
-        <child>
-          <object class="GtkLabel">
-            <property name="margin-top">5</property>
-            <property name="margin-bottom">5</property>
-            <property name="label" translatable="yes">This seems to be the first time you run OTPClient
-on this device. Please select whether you want to
-restore an existing database or create a new one.</property>
-            <property name="justify">center</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="diag_rc_restoredb_btn_id">
-            <property name="label" translatable="yes">Restore existing OTPClient database</property>
-            <property name="name">diag_rc_restoredb_btn</property>
-            <property name="receives-default">True</property>
-            <property name="tooltip-text" translatable="yes">Do NOT use to import third party databases (e.g. andOTP)</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="diag_rc_createdb_btn_id">
-            <property name="label" translatable="yes">Create new database</property>
-            <property name="name">diag_rc_createdb_btn</property>
-            <property name="receives-default">True</property>
-            <property name="margin-bottom">20</property>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child type="action">
-      <object class="GtkButton" id="cancel_btn_qrclipb_id">
-        <property name="label" translatable="yes">Cancel</property>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="cancel">cancel_btn_qrclipb_id</action-widget>
-    </action-widgets>
-  </object>
   <object class="GtkDialog" id="edit_diag_id">
     <property name="title" translatable="yes">Edit Entry</property>
     <child internal-child="content_area">
@@ -106,6 +63,49 @@ is &lt;b&gt;highly recommended&lt;/b&gt;</property>
     <action-widgets>
       <action-widget response="cancel">edit_diag_cancel_btn</action-widget>
       <action-widget response="ok">edit_diag_ok_btn</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="dialog_rcdb_id">
+    <property name="title" translatable="yes">Database location</property>
+    <child internal-child="content_area">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="margin-top">5</property>
+            <property name="margin-bottom">5</property>
+            <property name="label" translatable="yes">This seems to be the first time you run OTPClient
+              on this device. Please select whether you want to
+              restore an existing database or create a new one.</property>
+            <property name="justify">center</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="diag_rc_restoredb_btn_id">
+            <property name="label" translatable="yes">Restore existing OTPClient database</property>
+            <property name="name">diag_rc_restoredb_btn</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Do NOT use to import third party databases (e.g. andOTP)</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="diag_rc_createdb_btn_id">
+            <property name="label" translatable="yes">Create new database</property>
+            <property name="name">diag_rc_createdb_btn</property>
+            <property name="receives-default">True</property>
+            <property name="margin-bottom">20</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child type="action">
+      <object class="GtkButton" id="cancel_btn_qrclipb_id">
+        <property name="label" translatable="yes">Cancel</property>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">cancel_btn_qrclipb_id</action-widget>
     </action-widgets>
   </object>
   <object class="GtkDialog" id="warning_diag_id">

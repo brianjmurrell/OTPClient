@@ -7,7 +7,7 @@
 
 G_BEGIN_DECLS
 
-typedef struct _db_data {
+typedef struct db_data_t {
     gchar *db_path;
 
     gchar *key;
@@ -25,9 +25,7 @@ typedef struct _db_data {
 } DatabaseData;
 
 
-typedef struct _app_data_t {
-    GtkBuilder *builder;
-
+typedef struct app_data_t {
     GtkWidget *main_window;
     GtkTreeView *tree_view;
 

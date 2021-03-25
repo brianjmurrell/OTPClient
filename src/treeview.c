@@ -3,6 +3,7 @@
 #include "otpclient.h"
 #include "liststore-misc.h"
 #include "message-dialogs.h"
+#include "get-builder.h"
 
 
 typedef struct parsed_json_data {
@@ -38,7 +39,9 @@ create_treeview (AppData *app_data)
 {
     g_signal_new ("hide-all-otps", G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
 
-    app_data->tree_view = GTK_TREE_VIEW(gtk_builder_get_object (app_data->builder, "treeview_id"));
+    g_autoptr(GtkBuilder) tv_builder = NULL;
+    tv_builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "main.ui", NULL));
+    app_data->tree_view = GTK_TREE_VIEW(gtk_builder_get_object (tv_builder, "treeview_id"));
 
     gtk_widget_class_add_binding_signal (GTK_WIDGET_CLASS(app_data->tree_view), GDK_KEY_h, GDK_CONTROL_MASK, "hide-all-otps", NULL);
 

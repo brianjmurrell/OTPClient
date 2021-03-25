@@ -79,7 +79,7 @@ add_qr_from_clipboard (GSimpleAction *simple    __attribute__((unused)),
     gt_cb_data->app_data = app_data;
     gt_cb_data->source_id = g_timeout_add (1000, check_result, gt_cb_data);
 
-    GtkBuilder *builder = get_builder_from_partial_path (UI_PARTIAL_PATH);
+    GtkBuilder *builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "add_token_dialogs.ui", NULL));
     gt_cb_data->diag = GTK_WIDGET(gtk_builder_get_object (builder, "diag_qr_clipboard_id"));
     gtk_widget_show (gt_cb_data->diag);
 

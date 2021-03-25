@@ -14,7 +14,6 @@
 #include "common/common.h"
 #include "version.h"
 
-
 #ifndef USE_FLATPAK_APP_FOLDER
 static gchar     *get_db_path               (AppData            *app_data);
 
@@ -44,7 +43,8 @@ static void       set_warn_data             (GtkDialog          *dlg,
                                              gint                response_id,
                                              gpointer            user_data);
 
-static void       create_main_window        (gint                width,
+static void       create_main_window        (GtkBuilder         *builder,
+                                             gint                width,
                                              gint                height,
                                              AppData            *app_data);
 
@@ -114,9 +114,10 @@ activate (GtkApplication    *app,
 
     app_data->db_data = g_new0 (DatabaseData, 1);
 
-    app_data->builder = get_builder_from_partial_path (UI_PARTIAL_PATH);
+    g_autoptr(GtkBuilder) main_builder = NULL;
+    main_builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "main.ui", NULL));
 
-    create_main_window (width, height, app_data);
+    create_main_window (main_builder, width, height, app_data);
     if (app_data->main_window == NULL) {
         g_printerr ("Couldn't locate the ui file, exiting...\n");
         g_free (app_data->db_data);
@@ -144,10 +145,12 @@ activate (GtkApplication    *app,
     }
     g_free (cfg_file_path);
 #else
+    g_autoptr(GtkBuilder) misc_diags_builder = NULL;
+    misc_diags_builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "misc_diags.ui", NULL));
     if (!g_file_test (g_build_filename (g_get_user_config_dir (), "otpclient.cfg", NULL), G_FILE_TEST_EXISTS)) {
-        app_data->diag_rcdb = GTK_WIDGET(gtk_builder_get_object (app_data->builder, "dialog_rcdb_id"));
-        GtkWidget *restore_btn = GTK_WIDGET(gtk_builder_get_object (app_data->builder, "diag_rc_restoredb_btn_id"));
-        GtkWidget *create_btn = GTK_WIDGET(gtk_builder_get_object (app_data->builder, "diag_rc_createdb_btn_id"));
+        app_data->diag_rcdb = GTK_WIDGET(gtk_builder_get_object (misc_diags_builder, "dialog_rcdb_id"));
+        GtkWidget *restore_btn = GTK_WIDGET(gtk_builder_get_object (misc_diags_builder, "diag_rc_restoredb_btn_id"));
+        GtkWidget *create_btn = GTK_WIDGET(gtk_builder_get_object (misc_diags_builder, "diag_rc_createdb_btn_id"));
         gtk_window_set_transient_for (GTK_WINDOW(app_data->diag_rcdb), GTK_WINDOW(app_data->main_window));
         gtk_widget_show (app_data->diag_rcdb);
 
@@ -174,7 +177,7 @@ activate (GtkApplication    *app,
 #endif
 
     if (max_file_size < (96 * 1024) && get_warn_data () == TRUE) {
-        if (show_memlock_warn_dialog (max_file_size, app_data->builder) == TRUE) {
+        if (show_memlock_warn_dialog (max_file_size, misc_diags_builder) == TRUE) {
             g_free (app_data->db_data);
             g_free (app_data);
             g_application_quit (G_APPLICATION(app));
@@ -235,7 +238,7 @@ activate (GtkApplication    *app,
     g_notification_set_body (app_data->notification, "OTP value has been copied to the clipboard");
     g_object_unref (icon);
 
-    GtkToggleButton *del_toggle_btn = GTK_TOGGLE_BUTTON(gtk_builder_get_object (app_data->builder, "del_toggle_btn_id"));
+    GtkToggleButton *del_toggle_btn = GTK_TOGGLE_BUTTON(gtk_builder_get_object (main_builder, "del_toggle_btn_id"));
 
     g_signal_new ("toggle-delete-button", G_TYPE_OBJECT, G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION, 0, NULL, NULL, NULL, G_TYPE_NONE, 0);
     GtkEventController *controller = gtk_event_controller_key_new ();
@@ -425,16 +428,17 @@ set_warn_data (GtkDialog *dlg,
 
 
 static void
-create_main_window (gint             width,
+create_main_window (GtkBuilder      *builder,
+                    gint             width,
                     gint             height,
                     AppData         *app_data)
 {
-    app_data->main_window = GTK_WIDGET(gtk_builder_get_object (app_data->builder, "appwindow_id"));
+    app_data->main_window = GTK_WIDGET(gtk_builder_get_object (builder, "appwindow_id"));
     gtk_window_set_icon_name (GTK_WINDOW(app_data->main_window), "otpclient");
 
     gtk_window_set_default_size (GTK_WINDOW(app_data->main_window), (width >= 150) ? width : 500, (height >= 150) ? height : 300);
 
-    GtkWidget *header_bar =  GTK_WIDGET(gtk_builder_get_object (app_data->builder, "headerbar_id"));
+    GtkWidget *header_bar =  GTK_WIDGET(gtk_builder_get_object (builder, "headerbar_id"));
     GtkWidget *title = gtk_label_new ("OTPClient");
     gtk_widget_add_css_class (title, "title");
     GtkWidget *subtitle = gtk_label_new (PROJECT_VER);
@@ -444,7 +448,7 @@ create_main_window (gint             width,
     gtk_box_append (GTK_BOX(vbox), subtitle);
     gtk_header_bar_set_title_widget (GTK_HEADER_BAR(header_bar), vbox);
 
-    set_action_group (app_data->builder, app_data);
+    set_action_group (builder, app_data);
 }
 
 
@@ -681,7 +685,6 @@ destroy_cb (GtkWidget   *window,
     gint h = GPOINTER_TO_INT(g_object_get_data (G_OBJECT(window), "height"));
 #pragma GCC diagnostic pop
     save_window_size (w, h);
-    g_object_unref (app_data->builder);
     g_free (app_data);
 }
 

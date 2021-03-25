@@ -40,7 +40,7 @@ webcam_cb (GSimpleAction *simple    __attribute__((unused)),
     ConfigData *cfg_data = g_new0 (ConfigData, 1);
     cfg_data->app_data = app_data;
 
-    GtkBuilder *builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "add_token_dialogs", NULL));
+    GtkBuilder *builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "add_token_dialogs.ui", NULL));
     cfg_data->diag = GTK_WIDGET(gtk_builder_get_object (builder, "diag_webcam_id"));
 
     gtk_window_set_transient_for (GTK_WINDOW(cfg_data->diag), GTK_WINDOW(app_data->main_window));

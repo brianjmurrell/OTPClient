@@ -36,7 +36,7 @@ add_data_dialog (GSimpleAction *simple    __attribute__((unused)),
     packed_data->app_data = app_data;
     packed_data->retry = TRUE;
 
-    GtkBuilder *builder = get_builder_from_partial_path (UI_PARTIAL_PATH);
+    GtkBuilder *builder = get_builder_from_partial_path (g_strconcat (UI_PARTIAL_PATH, "add_token_dialogs.ui", NULL));
     widgets->dialog = GTK_WIDGET(gtk_builder_get_object (builder, "manual_add_diag_id"));
     widgets->otp_cb = GTK_WIDGET(gtk_builder_get_object (builder, "otp_combotext_id"));
     widgets->algo_cb = GTK_WIDGET(gtk_builder_get_object (builder, "algo_combotext_id"));
