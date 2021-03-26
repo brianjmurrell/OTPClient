@@ -2,9 +2,10 @@
 Type=Application
 Exec=otpclient
 Icon=com.github.paolostivanin.OTPClient
-Keywords=otp;totp;hotp;
+Keywords=OTP;TOTP;HOTP;2FA;Authentication
 Terminal=false
 Name=OTPClient
 Comment=GTK+ TOTP and HOTP client
-Categories=GTK;GNOME;Utility;
+Categories=GNOME;GTK;Security;Utility;
 StartupWMClass=otpclient
+StartupNotify=true

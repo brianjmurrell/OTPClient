@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/github/paolostivanin/OTPClient">
+    <file alias="style.css">resources/style.css</file>
+
+    <file compressed="true" preprocess="xml-stripblanks" alias="shortcuts.ui">resources/ui/shortcuts.ui</file>
+  </gresource>
+</gresources>
