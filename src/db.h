@@ -1,7 +1,7 @@
 #pragma once
 
 #include <jansson.h>
-#include "data.h"
+#include "data-structs.h"
 
 G_BEGIN_DECLS
 
@@ -17,11 +17,6 @@ G_BEGIN_DECLS
 
 void load_db                (DatabaseData   *db_data,
                              GError        **error);
-
-void update_and_reload_db   (AppData        *app_data,
-                             DatabaseData   *db_data,
-                             gboolean        regenerate_model,
-                             GError        **err);
 
 gint check_duplicate        (gconstpointer data,
                              gconstpointer user_data);

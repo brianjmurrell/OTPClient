@@ -1,14 +1,13 @@
-#include <gtk/gtk.h>
 #include <gcrypt.h>
 #include <jansson.h>
 #include <glib/gstdio.h>
-#include "db-misc.h"
-#include "otpclient.h"
-#include "file-size.h"
+#include "db.h"
+#include "data-structs.h"
 #include "gquarks.h"
+#include "get-file-size.h"
 #include "common/common.h"
 
-typedef struct _header_data {
+typedef struct header_data {
     guint8 iv[IV_SIZE];
     guint8 salt[KDF_SALT_SIZE];
 } HeaderData;
@@ -28,8 +27,6 @@ static guchar      *get_derived_key (const gchar *pwd, HeaderData *header_data);
 static void         backup_db       (const gchar *path);
 
 static void         restore_db      (const gchar *path);
-
-static inline void  json_free       (gpointer data);
 
 static void         cleanup         (GFile *, gpointer, HeaderData *, GError *);
 
@@ -71,32 +68,6 @@ load_db (DatabaseData    *db_data,
         guint32 hash = json_object_get_hash (obj);
         db_data->objects_hash = g_slist_append (db_data->objects_hash, g_memdup (&hash, sizeof (guint32)));
     }
-}
-
-
-void
-update_and_reload_db (AppData       *app_data,
-                      DatabaseData  *db_data,
-                      gboolean       regenerate_model,
-                      GError       **err)
-{
-    update_db (db_data, err);
-    if (*err != NULL && !g_error_matches (*err, missing_file_gquark (), MISSING_FILE_CODE)) {
-        g_printerr ("%s\n", (*err)->message);
-        return;
-    }
-    reload_db (db_data, err);
-    if (*err != NULL && !g_error_matches (*err, missing_file_gquark (), MISSING_FILE_CODE)) {
-        g_printerr ("%s\n", (*err)->message);
-        return;
-    }
-#ifdef BUILD_GUI
-    if (regenerate_model) {
-        update_model (app_data);
-        g_slist_free_full (app_data->db_data->data_to_add, json_free);
-        app_data->db_data->data_to_add = NULL;
-    }
-#endif
 }
 
 
@@ -384,13 +355,6 @@ restore_db (const gchar *path)
     }
     g_object_unref (src);
     g_object_unref (dst);
-}
-
-
-static inline void
-json_free (gpointer data)
-{
-    json_decref (data);
 }
 
 

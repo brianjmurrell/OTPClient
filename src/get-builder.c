@@ -9,7 +9,7 @@ get_builder_from_partial_path (const gchar *partial_path)
     // cmake trims the last '/', so we have to manually add it later on
     prefix = INSTALL_PREFIX;
 #else
-    prefix = "/app";
+    prefix = "/app/";
 #endif
     gchar *path = g_strconcat (prefix, "/", partial_path, NULL);
 

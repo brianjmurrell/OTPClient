@@ -1,6 +1,5 @@
 #include <glib.h>
 
-
 GQuark
 missing_file_gquark (void)
 {

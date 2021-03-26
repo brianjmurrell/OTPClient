@@ -1,5 +1,5 @@
 #include <gtk/gtk.h>
-#include "otpclient.h"
+#include "app.h"
 #include "version.h"
 
 gint
