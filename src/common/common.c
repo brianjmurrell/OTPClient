@@ -29,8 +29,8 @@ get_max_file_size_from_memlock (void)
 gchar *
 init_libs (gint32 max_file_size)
 {
-    if (!gcry_check_version ("1.6.0")) {
-        return g_strdup ("The required version of GCrypt is 1.6.0 or greater.");
+    if (!gcry_check_version ("1.8.0")) {
+        return g_strdup ("The required version of GCrypt is 1.8.0 or greater.");
     }
 
     if (gcry_control (GCRYCTL_INIT_SECMEM, max_file_size, 0)) {

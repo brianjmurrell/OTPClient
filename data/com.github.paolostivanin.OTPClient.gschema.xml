@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema path="/com/github/paolostivanin/OTPClient/" id="@app-id@" gettext-domain="@gettext-package@">
+    <key name="db-path" type="s">
+      <default>NULL</default>
+      <summary>Database path</summary>
+      <description>Absolute path to the last used database</description>
+    </key>
     <key name="show-next-otp" type="b">
       <default>false</default>
       <summary>Show Next OTP</summary>

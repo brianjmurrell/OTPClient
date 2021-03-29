@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <menu id="gear_menu">
+    <section>
+      <submenu>
+        <attribute name="label" translatable="yes">Import</attribute>
+        <section>
+          <item>
+            <attribute name="label" translatable="yes">andOTP (encrypted)</attribute>
+            <attribute name="action">settings_menu.import_andotp</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">andOTP (plain json)</attribute>
+            <attribute name="action">settings_menu.import_andotp_plain</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="no">Authenticator Plus</attribute>
+            <attribute name="action">settings_menu.import_authplus</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="no">FreeOTP+ (key URI)</attribute>
+            <attribute name="action">settings_menu.import_freeotpplus</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Aegis (plain json)</attribute>
+            <attribute name="action">settings_menu.import_aegis</attribute>
+          </item>
+        </section>
+      </submenu>
+      <submenu>
+        <attribute name="label" translatable="yes">Export</attribute>
+        <section>
+          <item>
+            <attribute name="label" translatable="yes">andOTP (encrypted)</attribute>
+            <attribute name="action">settings_menu.export_andotp</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">andOTP (plain json)</attribute>
+            <attribute name="action">settings_menu.export_andotp_plain</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="no">FreeOTP+ (key URI)</attribute>
+            <attribute name="action">settings_menu.export_freeotpplus</attribute>
+          </item>
+          <item>
+            <attribute name="label" translatable="yes">Aegis (plain json)</attribute>
+            <attribute name="action">settings_menu.export_aegis</attribute>
+          </item>
+        </section>
+      </submenu>
+      <item>
+        <attribute name="label" translatable="yes">_Change password</attribute>
+        <attribute name="action">settings_menu.change_pwd</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Edit row</attribute>
+        <attribute name="action">settings_menu.edit_row</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Settings</attribute>
+        <attribute name="action">settings_menu.settings</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+        <attribute name="action">settings_menu.show-shortcuts</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_About OTPClient</attribute>
+        <attribute name="action">settings_menu.about-dialog</attribute>
+      </item>
+    </section>
+  </menu>
+  <menu id="add_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Scan using webcam</attribute>
+        <attribute name="action">add_menu.webcam</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Take screenshot</attribute>
+        <attribute name="action">add_menu.screenshot</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_From QR code (file)</attribute>
+        <attribute name="action">add_menu.qrcode</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Manually</attribute>
+        <attribute name="action">add_menu.manually</attribute>
+      </item>
+    </section>
+  </menu>
+  <object class="GtkApplicationWindow" id="mainwin">
+    <property name="title">OTPClient</property>
+    <property name="default-width">550</property>
+    <property name="default-height">750</property>
+    <child type="titlebar">
+        <object class="GtkHeaderBar" id="mainwin_hb_id">
+          <property name="show-title-buttons">TRUE</property>
+          <property name="decoration-layout">menu:close</property>
+          <child>
+            <object class="GtkBox">
+              <child>
+                <object class="GtkMenuButton" id="add_button">
+                  <property name="tooltip-text" translatable="yes">Add token</property>
+                  <property name="icon-name">list-add-symbolic</property>
+                  <property name="menu-model">add_menu</property>
+                </object>
+              </child>
+              <child>
+                <object class="GtkToggleButton" id="del_button">
+                  <property name="name">delbtn</property>
+                  <property name="tooltip-text" translatable="yes">Delete selected rows</property>
+                  <property name="icon-name">list-remove-symbolic</property>
+                </object>
+              </child>
+              <style>
+                <class name="linked"/>
+              </style>
+            </object>
+          </child>
+          <child type="end">
+            <object class="GtkToggleButton" id="search_button">
+              <property name="icon-name">system-search-symbolic</property>
+              <property name="tooltip-text" translatable="yes">Search</property>
+            </object>
+          </child>
+          <child type="end">
+            <object class="GtkMenuButton" id="gear_menu_button">
+              <property name="valign">center</property>
+              <property name="menu-model">gear_menu</property>
+              <property name="icon-name">open-menu-symbolic</property>
+            </object>
+          </child>
+        </object>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkSearchBar">
+            <property name="search-mode-enabled" bind-source="search_button" bind-property="active" bind-flags="bidirectional"/>
+            <signal name="notify::search-mode-enabled" handler="search_enabled" object="search_entry"/>
+            <child>
+              <object class="GtkSearchEntry" id="search_entry">
+                <signal name="search-changed" handler="search_changed"/>
+                <signal name="stop-search" handler="stop_search"/>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolledwin_id">
+          <property name="hexpand">1</property>
+          <property name="vexpand">1</property>
+            <child>
+              <object class="GtkColumnView" id="column_view_id">
+                <property name="show-row-separators">True</property>
+                <property name="single-click-activate">True</property>
+                <child>
+                  <object class="GtkColumnViewColumn" id="acc_clmn_id">
+                    <property name="title">Account</property>
+                    <property name="expand">True</property>
+                    <property name="factory">
+                      <object class="GtkBuilderListItemFactory">
+                        <property name="bytes">
+                          <![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+<template class="GtkListItem">
+  <property name="child">
+    <object class="GtkLabel">
+      <property name="xalign">0</property>
+      <binding name="label">
+        <lookup name="account" type="SettingsKey">
+          <lookup name="item">GtkListItem</lookup>
+        </lookup>
+      </binding>
+    </object>
+  </property>
+</template>
+</interface>
+]]>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkColumnViewColumn" id="iss_clmn_id">
+                    <property name="title">Issuer</property>
+                    <property name="expand">True</property>
+                    <property name="factory">
+                      <object class="GtkBuilderListItemFactory">
+                        <property name="bytes">
+                          <![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+<template class="GtkListItem">
+  <property name="child">
+    <object class="GtkLabel">
+      <property name="xalign">0</property>
+      <binding name="label">
+        <lookup name="issuer" type="SettingsKey">
+          <lookup name="item">GtkListItem</lookup>
+        </lookup>
+      </binding>
+    </object>
+  </property>
+</template>
+</interface>
+]]>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkColumnViewColumn" id="otp_clmn_id">
+                    <property name="title">OTP</property>
+                    <property name="factory">
+                      <object class="GtkBuilderListItemFactory">
+                        <property name="bytes">
+                          <![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+<template class="GtkListItem">
+  <property name="child">
+    <object class="GtkLabel">
+      <property name="xalign">0</property>
+      <binding name="label">
+        <lookup name="otp" type="SettingsKey">
+          <lookup name="item">GtkListItem</lookup>
+        </lookup>
+      </binding>
+    </object>
+  </property>
+</template>
+</interface>
+]]>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkColumnViewColumn" id="validity_clmn_id">
+                    <property name="title">Validity</property>
+                    <property name="factory">
+                      <object class="GtkBuilderListItemFactory">
+                        <property name="bytes">
+                          <![CDATA[
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+<template class="GtkListItem">
+  <property name="child">
+    <object class="GtkLabel">
+      <property name="xalign">0</property>
+      <binding name="label">
+        <lookup name="validity" type="SettingsKey">
+          <lookup name="item">GtkListItem</lookup>
+        </lookup>
+      </binding>
+    </object>
+  </property>
+</template>
+</interface>
+]]>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class='GtkShortcutController'>
+        <property name='scope'>global</property>
+        <child>
+          <object class='GtkShortcut'>
+            <property name='trigger'>&lt;Primary&gt;Q</property>
+            <property name='action'>action(app.quit)</property>
+          </object>
+        </child>
+        <child>
+          <object class='GtkShortcut'>
+            <property name='trigger'>&lt;Primary&gt;A</property>
+            <property name='action'>action(app.add)</property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
+
