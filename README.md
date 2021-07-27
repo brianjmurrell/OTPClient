@@ -6,16 +6,17 @@
 Highly secure and easy to use GTK+ software for two-factor authentication that supports both Time-based One-time Passwords (TOTP) and HMAC-Based One-Time Passwords (HOTP).
 
 ## Requirements
-|Name|Min Version|Suggested Min Version|
-|----|-----------|-----------------|
-|GTK+|3.18| 3.22|
-|Glib|2.48.0|2.50|
-|jansson|2.6.0|-|
-|libgcrypt|1.6.0|-|
-|libzip|1.0.0|-|
-|libpng|1.2.0|-|
-|[libcotp](https://github.com/paolostivanin/libcotp)|1.2.1|-|
-|zbar|0.10|0.20 ([linuxtv](https://linuxtv.org/downloads/zbar/))|
+|Name|Min Version|
+|----|-----------|
+|GTK+|4.0|
+|Glib|2.58|
+|jansson|2.10.0|
+|libgcrypt|1.8.0|
+|libzip|1.5.0|
+|libpng|1.2.0|
+|[libcotp](https://github.com/paolostivanin/libcotp)|1.2.1|
+|zbar|0.20|
+|cmake|3.5|
 
 ## Features
 - support both TOTP and HOTP
@@ -43,12 +44,12 @@ If OTPClient hasn't been packaged for your distro ([check here](https://github.c
 1. install all the needed libraries listed under [requirements](#requirements)
 2. clone and install OTPClient:
 ```
-$ git clone https://github.com/paolostivanin/OTPClient.git
-$ cd OTPClient
-$ mkdir build && cd $_
-$ cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-$ make
-$ sudo make install
+git clone https://github.com/paolostivanin/OTPClient.git
+cd OTPClient
+mkdir build && cd build
+cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+make
+sudo make install
 ```
 
 ## License

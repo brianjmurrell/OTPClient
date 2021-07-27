@@ -6,7 +6,6 @@ include_directories(${PROJECT_BINARY_DIR})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-option(USE_FLATPAK_APP_FOLDER "Use flatpak app's config folder to store the database" OFF)
 option(BUILD_GUI "Build the GUI" ON)
 option(BUILD_CLI "Build the CLI" ON)
 

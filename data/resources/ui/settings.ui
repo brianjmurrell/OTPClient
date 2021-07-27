@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <object class="GtkDialog" id="settings_diag_id">
+    <property name="title" translatable="yes">Settings</property>
+    <child internal-child="content_area">
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkGrid" id="grid">
+            <property name="orientation">vertical</property>
+            <property name="column-spacing">10</property>
+            <property name="row-spacing">10</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Show next OTP</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="nextotp_switch_id">
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Disable notifications</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="notif_switch_id">
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">1</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Search by</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="search_by_cb_id">
+                <property name="active">0</property>
+                <property name="active-id">0</property>
+                <items>
+                  <item id="0" translatable="yes">Account</item>
+                  <item id="1" translatable="yes">Issuer</item>
+                </items>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">2</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Auto lock on system lock</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">3</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="autolock_switch_id">
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">3</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="yes">Auto lock when inactive for</property>
+                <layout>
+                  <property name="column">0</property>
+                  <property name="row">4</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="autolock_inactive_cb_id">
+                <property name="active">0</property>
+                <property name="active-id">0</property>
+                <items>
+                  <item id="0" translatable="yes">Never</item>
+                  <item id="30" translatable="yes">30s</item>
+                  <item id="60" translatable="yes">1m</item>
+                  <item id="300" translatable="yes">5m</item>
+                  <item id="900" translatable="yes">15m</item>
+                  <item id="1800" translatable="yes">30m</item>
+                </items>
+                <layout>
+                  <property name="column">1</property>
+                  <property name="row">4</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child internal-child="action_area">
+      <object class="GtkBox">
+        <property name="homogeneous">1</property>
+        <property name="spacing">5</property>
+        <property name="margin-top">20</property>
+        <child>
+          <object class="GtkButton" id="settings_diag_cancel_btn_id">
+            <property name="label" translatable="yes">Cancel</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="settings_diag_ok_btn_id">
+            <property name="label" translatable="yes">OK</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="cancel">settings_diag_cancel_btn_id</action-widget>
+      <action-widget response="ok">settings_diag_ok_btn_id</action-widget>
+    </action-widgets>
+  </object>
+</interface>

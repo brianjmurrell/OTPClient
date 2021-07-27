@@ -1,6 +1,6 @@
 app-id: com.github.paolostivanin.OTPClient
 runtime: org.gnome.Platform
-runtime-version: '3.38'
+runtime-version: '40'
 sdk: org.gnome.Sdk
 command: otpclient
 finish-args:
@@ -11,6 +11,8 @@ finish-args:
 - --socket=wayland
 # Notification access
 - --talk-name=org.freedesktop.Notifications
+# Follow night light settings
+- --talk-name=org.gnome.SettingsDaemon.Color
 # Screen Lock Listener
 - --talk-name=org.freedesktop.ScreenSaver
 - --talk-name=org.freedesktop.login1.Manager
@@ -18,7 +20,8 @@ finish-args:
 - --talk-name=org.gnome.ScreenSaver
 - --talk-name=org.gnome.SessionManager
 - --talk-name=org.gnome.SessionManager.Presence
-- --talk-name=com.canonical.Unity.Session
+# Home access, so the user can decide where to store the DB
+- --filesystem=home
 # Other
 - --device=all
 - --talk-name=org.gnome.Shell.Screenshot
@@ -90,7 +93,6 @@ modules:
   buildsystem: cmake-ninja
   config-opts:
   - "-DCMAKE_BUILD_TYPE=Release"
-  - "-DUSE_FLATPAK_APP_FOLDER=ON"
   sources:
   - type: git
     url: https://github.com/paolostivanin/OTPClient.git

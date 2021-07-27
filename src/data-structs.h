@@ -28,9 +28,13 @@ typedef struct db_data_t {
 typedef struct app_data_t {
     GtkWidget *main_window;
 
+    GSettings *settings;
+
     GdkClipboard *clipboard;
 
     GNotification *notification;
+
+    DatabaseData *db_data;
 } AppData;
 
 G_END_DECLS
